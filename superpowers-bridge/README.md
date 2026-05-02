@@ -2,6 +2,37 @@
 
 將 OpenSpec 的 artifact 治理流程與 Superpowers 的執行技能整合為單一工作流。
 
+## Install
+
+### Method 1: Claude Code one-shot prompt (recommended)
+
+Copy and paste this into Claude Code in your project root:
+
+```
+Install the superpowers-bridge schema for OpenSpec into this project:
+
+1. Verify the project has an `openspec/` directory (run `openspec init` if missing).
+2. Clone https://github.com/JiangWay/openspec-schemas to a temp dir.
+3. Copy the `superpowers-bridge/` subdirectory to `openspec/schemas/superpowers-bridge/`.
+4. Run `openspec schema validate superpowers-bridge` to verify.
+5. Run `openspec schemas` and confirm `superpowers-bridge` is listed.
+6. Clean up the temp directory.
+7. Verify Superpowers plugin is installed by running `claude plugin list`.
+   If not listed, run `claude plugin install superpowers@claude-plugins-official`.
+8. Show me the final state.
+```
+
+### Method 2: Manual bash (CI / non-Claude environments)
+
+```bash
+git clone https://github.com/JiangWay/openspec-schemas /tmp/oss
+cp -R /tmp/oss/superpowers-bridge ~/your-project/openspec/schemas/superpowers-bridge
+rm -rf /tmp/oss
+cd ~/your-project
+openspec schema validate superpowers-bridge
+claude plugin install superpowers@claude-plugins-official  # if not already
+```
+
 ## 這個 Schema 解決什麼問題
 
 OpenSpec 管理「做什麼」（proposal → specs → design → tasks），Superpowers 管理「怎麼做」（brainstorming、writing-plans、subagent-driven-development）。兩者各自優秀，但在實際開發中交替使用時出現三個結構性問題：
