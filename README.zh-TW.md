@@ -22,7 +22,7 @@
 
 ## 安裝
 
-完整安裝指南見 [`docs/install.md`](./docs/install.md)。每個 bridge 子目錄底下也有自己的 `README.md`,附上**複製貼上到 Claude Code 一鍵安裝**的 prompt。
+每個 bridge 子目錄底下都有自己的 `README.md`,附**複製貼上到 Claude Code 一鍵安裝**的 prompt,以及手動 bash 替代方案。例如 [`superpowers-bridge/README.md#install`](./superpowers-bridge/README.md#install)。
 
 ## Roadmap
 

@@ -21,7 +21,7 @@ Benefits:
 
 ## Install
 
-See [`docs/install.md`](./docs/install.md) for the complete install guide. Each bridge directory also has its own `README.md` with a copy-paste Claude Code prompt for one-shot installation.
+Each bridge directory has its own `README.md` with a copy-paste Claude Code prompt for one-shot installation, plus a manual bash alternative. See e.g. [`superpowers-bridge/README.md#install`](./superpowers-bridge/README.md#install).
 
 ## Roadmap
 
