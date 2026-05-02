@@ -1,8 +1,13 @@
-name: sdd-plus-superpowers
+name: superpowers-bridge
 version: 1
 description: >
   Spec-driven workflow integrated with Superpowers skills.
-  brainstorm → proposal → specs → tasks → plan → verify.
+  Requirements: Superpowers plugin installed, providing skills:
+  brainstorming, writing-plans, using-git-worktrees,
+  subagent-driven-development, finishing-a-development-branch.
+  Each artifact / apply step verifies its required skills before
+  invoking and surfaces a clear error if any are missing.
+  brainstorm → proposal → specs → tasks → plan → verify → retrospective.
   design is optional (produced from brainstorm but not required by tasks).
   Apply phase uses git worktrees + subagent-driven-development
   (brings TDD and code-review transitively). executing-plans is

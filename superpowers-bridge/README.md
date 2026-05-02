@@ -1,4 +1,4 @@
-# sdd-plus-superpowers Schema
+# superpowers-bridge Schema
 
 將 OpenSpec 的 artifact 治理流程與 Superpowers 的執行技能整合為單一工作流。
 
@@ -20,7 +20,7 @@ OpenSpec 管理「做什麼」（proposal → specs → design → tasks），Su
 自定義 schema 利用 OpenSpec **原生支援的專案級 schema 機制**：
 - CLI 會驗證 schema 結構
 - `openspec schemas` 自動列出
-- 每個 change 可獨立選擇 schema（`--schema spec-driven` 或 `--schema sdd-plus-superpowers`）
+- 每個 change 可獨立選擇 schema（`--schema spec-driven` 或 `--schema superpowers-bridge`）
 - 不動任何現有 SKILL.md 或 command 檔案
 
 ---
@@ -35,7 +35,7 @@ brainstorm ──→ proposal ──→ specs ──→ tasks ──→ plan
 
 與 `spec-driven` 的差異：
 
-| | spec-driven | sdd-plus-superpowers |
+| | spec-driven | superpowers-bridge |
 |---|---|---|
 | 起點 | proposal（手動撰寫） | **brainstorm**（調用 brainstorming skill） |
 | 終點 | tasks（粗粒度） | **plan**（微型 TDD 步驟） |
@@ -79,7 +79,7 @@ Superpowers 技能有預設的輸出路徑（如 brainstorming 寫到 `docs/supe
 
 ### 逐步流程
 ```bash
-/opsx:new my-feature --schema sdd-plus-superpowers
+/opsx:new my-feature --schema superpowers-bridge
 /opsx:continue         # → brainstorm（互動式對話）
 /opsx:continue         # → proposal
 /opsx:continue         # → design（optional，僅在需要解釋技術決策時）
