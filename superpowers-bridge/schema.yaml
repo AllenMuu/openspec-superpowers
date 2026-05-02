@@ -178,6 +178,20 @@ artifacts:
     description: Post-implementation verification against specs, design, and tasks
     template: verify.md
     instruction: |
+      PRECHECK — implementation evidence:
+      Before producing verify.md, run BOTH commands. If either
+      returns 0, STOP and tell the user that apply phase has not
+      yet produced reviewable changes.
+
+      1. Commit evidence (must return > 0):
+         git log --oneline $(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD origin/master 2>/dev/null)..HEAD | wc -l
+
+      2. Task progress (must return > 0):
+         grep -c '^- \[x\]' openspec/changes/<change-name>/tasks.md
+
+      Only after BOTH return positive numbers, proceed to invoke
+      the verification skill below.
+
       Use the Skill tool to invoke **openspec-verify-change** (the
       `/opsx:verify` slash command is its user-facing equivalent).
 
@@ -229,6 +243,18 @@ artifacts:
     description: Evidence-first retrospective of completed change
     template: retrospective.md
     instruction: |
+      PRECHECK — verify completion evidence:
+      Before producing retrospective.md, run these commands. If
+      either fails, STOP and tell the user verify must pass first.
+
+      1. verify.md exists:
+         test -f openspec/changes/<change-name>/verify.md
+
+      2. verify.md does not contain unresolved blocking issues:
+         ! grep -q '^- 🔴' openspec/changes/<change-name>/verify.md
+
+      Only after both succeed, proceed.
+
       Write a retrospective of this change with evidence-first analysis.
 
       IMPORTANT timing note:
