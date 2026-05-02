@@ -89,14 +89,14 @@ Differences from `spec-driven`:
 | 1 | `superpowers:brainstorming` | `brainstorm` artifact instruction | Direct (with PRECHECK) |
 | 2 | `superpowers:writing-plans` | `plan` artifact instruction | Direct (with PRECHECK) |
 | 3 | `superpowers:using-git-worktrees` | apply step 1 | Direct |
-| 4 | `superpowers:subagent-driven-development` | apply step 2a | Direct |
+| 4 | `superpowers:subagent-driven-development` | apply step 2 | Direct |
 | 5 | `superpowers:test-driven-development` | (activated inside #4) | **Transitive** |
 | 6 | `superpowers:requesting-code-review` | (activated inside #4) | **Transitive** |
 | 7 | `superpowers:finishing-a-development-branch` | apply step 4 | Direct |
 
-Plus one fallback: `superpowers:executing-plans` (apply step 2b) — only for platforms without subagent support; on Claude Code, 2a is always preferred.
-
 Plus one OpenSpec built-in: `openspec-verify-change` (apply step 3, produces `verify.md`).
+
+> **No `executing-plans` fallback.** This schema is opinionated: it requires a subagent-capable platform (Claude Code, Codex, etc.). The alternative executor `superpowers:executing-plans` does not transitively activate TDD or code-review (verified against its [SKILL.md](https://github.com/obra/superpowers/blob/main/skills/executing-plans/SKILL.md)) — falling back would silently degrade Superpowers' core value. If your platform lacks subagent support, use the built-in `spec-driven` schema instead.
 
 ### Output redirection
 
@@ -157,7 +157,7 @@ Confirms these skills are installed before proceeding:
 - `superpowers:subagent-driven-development` (transitive: `test-driven-development`, `requesting-code-review`)
 - `superpowers:finishing-a-development-branch`
 
-Missing skill → STOP with explicit error. No silent fallback. The user can install Superpowers, or explicitly opt in to manual fallback via the instruction's tail clause.
+Missing skill → STOP with explicit error. No silent fallback, no manual mode within this schema. The user should either install Superpowers or switch to the built-in `spec-driven` schema for that change.
 
 > The v0 version of this schema once placed an "auto-commit change artifacts to current branch" step here. It was removed after the [PR #970 review](https://github.com/Fission-AI/OpenSpec/pull/970): handling untracked change directories is the worktree skill's responsibility, not the schema's.
 
@@ -165,7 +165,7 @@ Missing skill → STOP with explicit error. No silent fallback. The user can ins
 
 Creates `.worktrees/<change-name>/`, switches to a new branch, runs setup, confirms a clean test baseline.
 
-#### 2a. Executor — `superpowers:subagent-driven-development` (default)
+#### 2. Executor — `superpowers:subagent-driven-development`
 
 Main agent reads `plan.md`, dispatches a fresh subagent per micro-task. Each subagent transitively activates:
 
@@ -174,7 +174,7 @@ Main agent reads `plan.md`, dispatches a fresh subagent per micro-task. Each sub
 
 Coarse `tasks.md` checkboxes tick as tasks complete. After all tasks, a final code review covers the whole implementation.
 
-> **2b fallback**: only on platforms without subagent support. Claude Code has subagents, so 2a is always right. Under 2b, neither TDD nor code-review activates transitively — invoke them manually.
+This schema does NOT support `superpowers:executing-plans` as a fallback. See the "Six design touches" section below for rationale.
 
 #### 3. Verification — `openspec-verify-change`
 
@@ -225,9 +225,9 @@ Integration lives entirely in `instruction:` fields (pure prompts). If Superpowe
 
 TDD and code-review are normally hidden inside `subagent-driven-development`'s SKILL.md. Our schema's apply step 2a instruction lists these two transitive activations explicitly, so a reader can see "what actually happens during apply" at a glance.
 
-### 4. Fallback path honestly labeled
+### 4. Opinionated: subagent platforms only, no manual fallback
 
-2b (`executing-plans`) exists but is labeled as the "platforms without subagent support" fallback, citing Superpowers' own SKILL.md L14. We don't invent a self-serving rule like "use 2b for small changes."
+This schema requires a subagent-capable platform (Claude Code, Codex, etc.). The alternative executor `superpowers:executing-plans` does NOT transitively activate TDD or code-review (verified against its [SKILL.md](https://github.com/obra/superpowers/blob/main/skills/executing-plans/SKILL.md) — its body has no mention of either, and its Integration section omits both `test-driven-development` and `requesting-code-review`). Falling back to it would silently lose what Superpowers brings to this integration. We prefer to fail loud at Step 0 and direct users to the built-in `spec-driven` schema instead.
 
 ### 5. Evidence-based PRECHECK for verify and retrospective (Layer 2 capability detection)
 
@@ -282,7 +282,10 @@ Apply requires `plan` (not `tasks`) because the executor needs micro-steps; `tra
 
 ### Fallback strategy
 
-If a Superpowers skill is unavailable, every relevant instruction includes an explicit fallback path: `brainstorm` → manual; `plan` → manual; apply → standard task-by-task. The PRECHECK at the start of each instruction ensures missing skills surface as a clear error rather than silent degradation.
+If a Superpowers skill is unavailable:
+
+- **`brainstorm` / `plan` artifacts** — the user may explicitly opt in to writing the artifact manually (PRECHECK STOPs and informs the user; manual override requires deliberate user action, not silent degradation)
+- **`apply` phase** — no manual fallback within this schema. PRECHECK STOPs at Step 0 if any required skill is missing. The recommended path is to switch to the built-in `spec-driven` schema for that change. Rationale: see Design touch #4 above — `executing-plans` does not transitively activate TDD or code-review, and a degraded apply phase would defeat the schema's purpose.
 
 ---
 
