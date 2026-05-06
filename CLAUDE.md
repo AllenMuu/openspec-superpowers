@@ -17,7 +17,8 @@ openspec-schemas/                     ← 本 repo
 ├── LICENSE                           ← MIT
 ├── .gitignore
 ├── .github/workflows/
-│   └── validate-schemas.yml          ← CI 對每個 bridge 跑 openspec schema validate
+│   ├── validate-schemas.yml          ← CI 對每個 bridge 跑 openspec schema validate
+│   └── version-check.yml             ← 每週驗證 upstream OpenSpec / Superpowers,落後就開 issue
 ├── docs/
 │   ├── roadmap.md / .zh-TW.md        ← 公開 roadmap
 │   └── superpowers/
