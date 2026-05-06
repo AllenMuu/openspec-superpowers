@@ -460,19 +460,24 @@ LLM 不必解讀 timing 文字 —— 跑指令、看結果即可。這是顧慮
 
 ---
 
-## 採用本 schema 的專案建議補一個 snapshot 區段
+## 相容性
 
-```markdown
-## 本專案現況(snapshot: YYYY-MM-DD)
+下表記錄通過驗證的 upstream 版本。CI 會每週重跑驗證(見 [version-check workflow](../.github/workflows/version-check.yml))。
 
-- **OpenSpec CLI**:v<version>
-- **Schema**:`superpowers-bridge` v<n>
-- **Specs(bounded-context 粒度)**:<n> domain 存在、<n> domain 預留 lazy backfill
-- **Automation**:<pre-commit / CI 跑什麼 openspec 指令>
-- **Superpowers plugin**:`superpowers@<version>`,本整合用到 N 個 skill
-```
+| superpowers-bridge | OpenSpec CLI | Superpowers plugin | 最後驗證 |
+|---|---|---|---|
+| v1 | `1.3.1` | `v5.1.0` | 2026-05-06 |
 
-> snapshot 會隨時間 stale;權威狀態請用 `openspec list` + `openspec schemas` 現場查。
+### Known breaking changes
+
+目前尚無。未來 schema graph 結構性變動(artifact 增刪、`requires:` edge 變動、PRECHECK 變動)會記錄在這裡並附 migration note。
+
+### 哪些會自動偵測、哪些不會
+
+- ✅ **會自動偵測** —— 結構性破壞(新版 OpenSpec CLI 讓 `openspec schema validate superpowers-bridge` 失敗)。[validate-schemas workflow](../.github/workflows/validate-schemas.yml) 在每次 push/PR 跑;[version-check workflow](../.github/workflows/version-check.yml) 每週對最新版本跑,矩陣落後或 validate 失敗就開 / 更新 issue。
+- ⚠️ **不會自動偵測** —— Superpowers skill 的行為變動(skill 改名、改寫 prose 而影響 PRECHECK 語意、傳遞依賴變動)。version-check workflow 偵測到新版時開 issue,提醒人類去讀 release notes。
+
+採用者:版本 pin 在表中之上即可。要查自己專案的 runtime 現況,跑 `openspec list` + `openspec schemas` + `claude plugin list`。
 
 ---
 

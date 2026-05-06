@@ -460,21 +460,24 @@ The LLM does not need to interpret timing prose — it runs commands and reads r
 
 ---
 
-## Snapshot template for adopting projects
+## Compatibility
 
-Each project that adopts `superpowers-bridge` should keep a snapshot like this in its own docs:
+Tested against these upstream versions. CI re-verifies the latest weekly via the [version-check workflow](../.github/workflows/version-check.yml).
 
-```markdown
-## Current project state (snapshot: YYYY-MM-DD)
+| superpowers-bridge | OpenSpec CLI | Superpowers plugin | Last verified |
+|---|---|---|---|
+| v1 | `1.3.1` | `v5.1.0` | 2026-05-06 |
 
-- **OpenSpec CLI**: v<version>
-- **Schema**: `superpowers-bridge` v<n>
-- **Specs (bounded-context granularity)**: <n> domains exist, <n> reserved for lazy backfill
-- **Automation**: <which openspec commands run in pre-commit / CI>
-- **Superpowers plugin**: `superpowers@<version>`, this integration uses N skills
-```
+### Known breaking changes
 
-> Snapshot will go stale; for live state, run `openspec list` + `openspec schemas`.
+None to date. Future schema-graph structural changes (artifact add/remove, `requires:` edge changes, PRECHECK changes) will be listed here with a migration note.
+
+### What is and isn't auto-detected
+
+- ✅ **Auto-detected** — structural breaks where `openspec schema validate superpowers-bridge` fails against a new OpenSpec CLI release. The [validate-schemas workflow](../.github/workflows/validate-schemas.yml) runs on every push/PR; the [version-check workflow](../.github/workflows/version-check.yml) runs weekly against the latest published versions and opens / updates an issue if the matrix above falls behind or validation breaks.
+- ⚠️ **Not auto-detected** — behavioral changes inside Superpowers skills (skill renames, prose rewrites that alter PRECHECK semantics, transitive-dependency changes). When the version-check workflow sees a new upstream release, the issue prompts a human to read the release notes.
+
+For adopters: pin to versions ≥ those listed above. To inspect your own project's runtime state, run `openspec list` + `openspec schemas` + `claude plugin list`.
 
 ---
 
