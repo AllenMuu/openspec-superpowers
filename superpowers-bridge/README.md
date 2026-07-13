@@ -4,7 +4,7 @@
 
 [![Schema Structure](https://github.com/AllenMuu/openspec-superpowers/actions/workflows/validate-schemas.yml/badge.svg?branch=main)](https://github.com/AllenMuu/openspec-superpowers/actions/workflows/validate-schemas.yml)
 [![Upstream Drift](https://img.shields.io/github/issues-search/AllenMuu/openspec-superpowers?query=is%3Aopen%20label%3Aupstream-version-check&label=Upstream%20Drift&color=yellow)](https://github.com/AllenMuu/openspec-superpowers/issues?q=is%3Aopen+label%3Aupstream-version-check)
-[![OpenSpec baseline](https://img.shields.io/badge/OpenSpec_baseline-1.4.1-0277bd)](#compatibility)
+[![OpenSpec baseline](https://img.shields.io/badge/OpenSpec_baseline-1.5.0-0277bd)](#compatibility)
 [![Superpowers baseline](https://img.shields.io/badge/Superpowers_baseline-v5.1.0-0277bd)](#compatibility)
 
 > Bridges [OpenSpec](https://github.com/Fission-AI/OpenSpec)'s artifact governance (the **what**) with [obra/superpowers](https://github.com/obra/superpowers) execution skills (the **how**) into a single workflow. Adds an evidence-first `retrospective` artifact filling a gap Superpowers does not natively cover.
@@ -486,9 +486,9 @@ Current bundle release: **`1.1.0`** (git tag `v1.1.0`; see [VERSION](./VERSION))
 
 | superpowers-bridge | OpenSpec CLI | Superpowers plugin | Baseline as of |
 |---|---|---|---|
-| v1 | `1.4.1` | `v5.1.0` | 2026-06-10 |
+| v1 | `1.5.0` | `v5.1.0` | 2026-07-13 |
 
-> **Command surface vs baseline attestation.** The docs, adopter fragments, and `install.sh` already describe the OpenSpec **v1.5.0** command set (`propose / apply / archive / explore / sync`), and `install.sh` enforces `openspec >= 1.5.0`. The "Baseline as of" date above, however, still records human attestation against `1.4.1`. It will be bumped to `1.5.0` only after a maintainer re-runs a full cycle on `1.5.0` and confirms nothing degraded. In short: the **command surface is v1.5.0**; the **attested baseline is 1.4.1** until verified.
+> **Command surface vs baseline attestation.** The docs, adopter fragments, and `install.sh` describe the OpenSpec **v1.5.0** command set, and the attested baseline is now also `1.5.0` (attested 2026-07-13 after a maintainer ran a full cycle - propose -> apply -> verify -> retrospective - on 1.5.0). Command surface and attested baseline are aligned.
 
 ### How this is checked
 
