@@ -2,8 +2,8 @@
 
 [English](./README.md) · [繁體中文](./README.zh-TW.md)
 
-[![Schema Structure](https://github.com/JiangWay/openspec-schemas/actions/workflows/validate-schemas.yml/badge.svg?branch=main)](https://github.com/JiangWay/openspec-schemas/actions/workflows/validate-schemas.yml)
-[![Upstream Drift](https://img.shields.io/github/issues-search/JiangWay/openspec-schemas?query=is%3Aopen%20label%3Aupstream-version-check&label=Upstream%20Drift&color=yellow)](https://github.com/JiangWay/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check)
+[![Schema Structure](https://github.com/AllenMuu/openspec-superpowers/actions/workflows/validate-schemas.yml/badge.svg?branch=main)](https://github.com/AllenMuu/openspec-superpowers/actions/workflows/validate-schemas.yml)
+[![Upstream Drift](https://img.shields.io/github/issues-search/AllenMuu/openspec-superpowers?query=is%3Aopen%20label%3Aupstream-version-check&label=Upstream%20Drift&color=yellow)](https://github.com/AllenMuu/openspec-superpowers/issues?q=is%3Aopen+label%3Aupstream-version-check)
 [![OpenSpec baseline](https://img.shields.io/badge/OpenSpec_baseline-1.4.1-0277bd)](#compatibility)
 [![Superpowers baseline](https://img.shields.io/badge/Superpowers_baseline-v5.1.0-0277bd)](#compatibility)
 
@@ -15,6 +15,24 @@
 
 ## Install
 
+### Quick install (recommended)
+
+From your target repo root:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh)
+```
+
+[`install.sh`](./install.sh) runs `openspec init --tools claude`, installs the schema (backing up any existing copy), sets `superpowers-bridge` as the default schema, writes the v1.5.0 `Workflow routing` rule to `.claude/rules/openspec-routing.md` (auto-loaded by Claude Code; does not modify CLAUDE.md except to migrate legacy sections), gitignores `.claude/settings.local.json`, and validates. Requires `openspec >= 1.5.0` (hard-stops otherwise). Idempotent; does not commit.
+
+For Traditional Chinese routing text:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh) --locale zh-TW
+```
+
+> Requires: `openspec` CLI >= 1.5.0 (`brew install openspec`) and the Superpowers plugin (`claude plugin install superpowers@claude-plugins-official`). The script hard-stops if `openspec` is missing or < 1.5.0, and warns if the plugin is absent.
+
 ### Method 1: Claude Code one-shot prompt (recommended)
 
 Copy and paste this into Claude Code in your project root:
@@ -23,11 +41,11 @@ Copy and paste this into Claude Code in your project root:
 Install the superpowers-bridge schema for OpenSpec into this project:
 
 1. Verify the project has an `openspec/` directory (run `openspec init` if missing).
-2. Clone https://github.com/JiangWay/openspec-schemas to a temp dir.
+2. Clone https://github.com/AllenMuu/openspec-superpowers to a temp dir.
 3. Copy the `superpowers-bridge/` subdirectory to `openspec/schemas/superpowers-bridge/`.
 4. Run `openspec schema validate superpowers-bridge` to verify.
 5. Run `openspec schemas` and confirm `superpowers-bridge` is listed.
-6. If a CLAUDE.md exists at the project root, ask me whether to insert the workflow-routing fragment from `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md` (auto-detect locale from existing CLAUDE.md content; default zh-TW for Traditional Chinese, no suffix for English). If I say yes, append the fragment as a new section. If no CLAUDE.md exists, skip.
+6. Write the workflow-routing rule to `.claude/rules/openspec-routing.md`, sourced from `openspec/schemas/superpowers-bridge/templates/adopters/openspec-routing.<locale>.md` (auto-detect locale from existing CLAUDE.md content if present; default zh-TW for Traditional Chinese, no suffix for English). Claude Code auto-loads `.claude/rules/` at launch, so no CLAUDE.md edit is needed. If a legacy `## Workflow routing` section exists in CLAUDE.md (from older installs), remove it - the rule file supersedes it.
 7. Clean up the temp directory.
 8. Verify Superpowers plugin is installed by running `claude plugin list`.
    If not listed, run `claude plugin install superpowers@claude-plugins-official`.
@@ -37,24 +55,20 @@ Install the superpowers-bridge schema for OpenSpec into this project:
 ### Method 2: Manual bash (CI / non-Claude environments)
 
 ```bash
-git clone https://github.com/JiangWay/openspec-schemas /tmp/oss
-cp -R /tmp/oss/superpowers-bridge ~/your-project/openspec/schemas/superpowers-bridge
-
-# Optional: insert workflow-routing fragment into CLAUDE.md
-# cat /tmp/oss/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md       # English
-# cat /tmp/oss/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.zh-TW.md # zh-TW
-
-rm -rf /tmp/oss
+git clone https://github.com/AllenMuu/openspec-superpowers /tmp/oss
 cd ~/your-project
-openspec schema validate superpowers-bridge
-claude plugin install superpowers@claude-plugins-official  # if not already
+bash /tmp/oss/superpowers-bridge/install.sh          # full install (idempotent, does not commit)
+# or step by step:
+# cp -R /tmp/oss/superpowers-bridge openspec/schemas/superpowers-bridge
+# openspec schema validate superpowers-bridge
+rm -rf /tmp/oss
 ```
 
 ---
 
 ## Upgrading an existing install
 
-If your project already has `openspec/schemas/superpowers-bridge/` and you want to pull the latest version, use one of the upgrade methods below. The upgrade overwrites the entire `superpowers-bridge/` directory and offers a CLAUDE.md fragment update — see "What the upgrade overwrites" below.
+If your project already has `openspec/schemas/superpowers-bridge/` and you want to pull the latest version, use one of the upgrade methods below. The upgrade overwrites the entire `superpowers-bridge/` directory and refreshes the `.claude/rules/openspec-routing.md` rule file — see "What the upgrade overwrites" below.
 
 ### Upgrade Method 1: Claude Code one-shot prompt (recommended)
 
@@ -64,26 +78,22 @@ In your project root, paste this into Claude Code:
 Upgrade the superpowers-bridge schema in this project:
 
 1. Verify `openspec/schemas/superpowers-bridge/` already exists (upgrade, not fresh install). If missing, abort and tell me to use the install instructions instead.
-2. Clone https://github.com/JiangWay/openspec-schemas to a temp dir.
+2. Clone https://github.com/AllenMuu/openspec-superpowers to a temp dir.
 3. Show me the diff between the local `openspec/schemas/superpowers-bridge/` and the cloned `superpowers-bridge/` (use `diff -ruN`). Wait for my ack before overwriting.
 4. After my ack, overwrite the local schema dir with the cloned one.
 5. Run `openspec schema validate superpowers-bridge` to verify.
-6. Check whether this project has `CLAUDE.md` at the repo root.
-   - If yes: scan it for an existing workflow-routing section referencing superpowers-bridge.
-     - If found: show me the diff between that section and `superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md`. Wait for my ack before replacing.
-     - If not found: ask whether to insert the new fragment from `templates/adopters/CLAUDE.md.fragment.<locale>.md`.
-   - If no CLAUDE.md exists: skip.
+6. Refresh the routing rule at `.claude/rules/openspec-routing.md` from `superpowers-bridge/templates/adopters/openspec-routing.<locale>.md` (show me the diff first; wait for my ack before overwriting). Also scan `CLAUDE.md` for a legacy `## Workflow routing` section (left by older installs that wrote into CLAUDE.md); if found, offer to remove it - the rule file now carries that content.
 7. Clean up the temp directory.
 8. Show me the final state.
 ```
 
-> `<locale>` defaults to `zh-TW` if your CLAUDE.md is in Traditional Chinese, or no suffix (English). Claude detects from existing CLAUDE.md content.
+> `<locale>` defaults to `zh-TW` if your CLAUDE.md is in Traditional Chinese, or no suffix (English). Claude detects from existing CLAUDE.md content; if there's no CLAUDE.md, it defaults to English.
 
 ### Upgrade Method 2: Manual bash
 
 ```bash
 # 1. Get the latest bundle
-git clone https://github.com/JiangWay/openspec-schemas /tmp/oss-upgrade
+git clone https://github.com/AllenMuu/openspec-superpowers /tmp/oss-upgrade
 
 # 2. Review the diff first (don't overwrite blindly)
 diff -ruN ~/your-project/openspec/schemas/superpowers-bridge /tmp/oss-upgrade/superpowers-bridge
@@ -95,9 +105,11 @@ cp -R /tmp/oss-upgrade/superpowers-bridge ~/your-project/openspec/schemas/superp
 # 4. Validate
 cd ~/your-project && openspec schema validate superpowers-bridge
 
-# 5. CLAUDE.md fragment (manual)
-# View /tmp/oss-upgrade/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md
-# Compare against your CLAUDE.md and insert/update the corresponding section as needed
+# 5. Routing rule (manual)
+# Copy /tmp/oss-upgrade/superpowers-bridge/templates/adopters/openspec-routing.md
+#   (or openspec-routing.zh-TW.md) to .claude/rules/openspec-routing.md
+# Claude Code auto-loads .claude/rules/; remove any legacy '## Workflow routing'
+#   section from CLAUDE.md (older installs put it there)
 
 # 6. Clean up
 rm -rf /tmp/oss-upgrade
@@ -108,11 +120,11 @@ rm -rf /tmp/oss-upgrade
 | Path | Action | Manual step? |
 |---|---|---|
 | `openspec/schemas/superpowers-bridge/` | Auto-overwritten — entire directory replaced from upstream (`rm -rf` + `cp -R` in Method 2; equivalent in Method 1) | None |
-| `CLAUDE.md` (project root) | The schema dir ships `templates/adopters/CLAUDE.md.fragment.<locale>.md`; the upgrade procedure diffs your existing CLAUDE.md against this fragment and waits for your ack before inserting / replacing | Yes — review diff, choose insert / replace / keep |
+| `.claude/rules/openspec-routing.md` | The schema dir ships `templates/adopters/openspec-routing.<locale>.md`; the upgrade overwrites the rule file (Claude Code auto-loads it at launch) | Minimal — review diff, overwrite is safe |
 
-> The bridge directory is monolithic — you take the whole new version or stay on the old one. There is no per-file opt-in. CLAUDE.md is the only project-root file the upgrade ever touches, and never without your ack.
+> The bridge directory is monolithic — you take the whole new version or stay on the old one. There is no per-file opt-in. The upgrade touches `openspec/schemas/superpowers-bridge/` and `.claude/rules/openspec-routing.md`; it no longer writes into `CLAUDE.md` (older installs did — the upgrade removes any legacy `## Workflow routing` section from CLAUDE.md as part of migration).
 
-> In-flight changes (any phase: brainstorm / design / specs / ...) remain valid because the schema graph (`requires:` edges, PRECHECKs, artifact dependencies) hasn't changed in v1.x. Existing `verify.md` / `retrospective.md` from before the upgrade are still readable; if you re-run `/opsx:verify` or `/opsx:continue → retrospective` on them, the new template structure applies on overwrite.
+> In-flight changes (any phase: brainstorm / design / specs / ...) remain valid because the schema graph (`requires:` edges, PRECHECKs, artifact dependencies) hasn't changed in v1.x. Existing `verify.md` / `retrospective.md` from before the upgrade are still readable; re-generating them against the new templates applies the updated structure on overwrite.
 
 > If a future upgrade modifies the schema graph structurally (artifact add/remove, `requires:` edge changes, PRECHECK changes), the README will gain a version field and a migration guide. v1 → v1.x prose-only changes are safe and do not need migration.
 
@@ -153,7 +165,7 @@ Not every change needs a `change` directory. The following scenarios should skip
 
 | Scenario | Need a change? | What to do |
 |---|---|---|
-| New feature / new capability | ✅ Yes | `/opsx:new <name> --schema superpowers-bridge` |
+| New feature / new capability | ✅ Yes | `/opsx:propose <name>` (default schema = superpowers-bridge) |
 | Breaking change | ✅ Yes | Same |
 | Architecture change | ✅ Yes | Same |
 | Bug fix (restoring intended behavior, no contract change) | ❌ No | Direct PR |
@@ -169,7 +181,7 @@ Not every change needs a `change` directory. The following scenarios should skip
 
 If `superpowers:brainstorming` was triggered via narrative ("let's brainstorm the architecture") in a project that uses this schema, the brainstorming output **MUST NOT** land in `docs/superpowers/specs/` — that bypasses the schema's output redirection and creates orphan artifacts.
 
-The correct flow: keep brainstorming verbally until all 5 conditions below hold, then promote to `/opsx:propose` or `/opsx:new` so the agreed design lands in `openspec/changes/<name>/brainstorm.md`.
+The correct flow: keep brainstorming verbally until all 5 conditions below hold, then promote to `/opsx:propose` so the agreed design lands in `openspec/changes/<name>/brainstorm.md`.
 
 1. **Scope locked** — one sentence describes what's in / out, and the scope doesn't keep growing each turn
 2. **Major design forks resolved** — alternatives have been weighed and one chosen; remaining unknowns are **explicit TBDs** (with owner and impact-scope statement), not "haven't thought about it yet"
@@ -220,7 +232,7 @@ The Artifact DAG above shows **file-existence** dependencies. The runtime lifecy
 
 ```mermaid
 flowchart TD
-    Start([/opsx:propose · /opsx:new])
+    Start([/opsx:propose])
 
     subgraph Plan ["📝 PLANNING — 7 artifacts"]
         direction TB
@@ -324,32 +336,23 @@ Implemented purely via context injection at invocation time, not by modifying sk
 
 ### Quick flow (recommended)
 ```bash
-/opsx:ff my-feature    # one-shot: scaffold + brainstorm + proposal + design + specs + tasks + plan
-/opsx:apply            # worktree + subagent-driven-development (with TDD + code-review)
-/opsx:verify           # produces verify.md (7 checks)
-/opsx:continue         # → retrospective (produces retrospective.md, §0 + 6 sections)
-/opsx:archive          # archive
+/opsx:propose my-feature   # scaffold + all planning artifacts (brainstorm/proposal/design/specs/tasks/plan)
+/opsx:apply                # worktree + subagent-driven-development (TDD + code-review) + verify.md
+/opsx:archive              # archive (after retrospective)
 ```
 
 ### Step-by-step flow
 ```bash
-/opsx:new my-feature --schema superpowers-bridge
-/opsx:continue         # → brainstorm (interactive dialogue)
-/opsx:continue         # → proposal
-/opsx:continue         # → design (reorganize brainstorm into structured decisions)
-/opsx:continue         # → specs
-/opsx:continue         # → tasks
-/opsx:continue         # → plan
-/opsx:apply            # → implementation + worktree + subagent-driven-development
-/opsx:verify           # → verify.md (post-apply, runs the 7 checks)
-/opsx:continue         # → retrospective.md (post-verify, evidence-first §0 + 6 sections)
+/opsx:propose my-feature   # interactive: creates change + generates planning artifacts up to plan
+/opsx:apply                # implementation + worktree + subagent-driven-development + verify.md
+# retrospective.md is produced post-verify (evidence-first, §0 + 6 sections)
 /opsx:archive
 ```
 
 ### Switching back to spec-driven
 ```bash
-# Use a different schema for one change
-/opsx:new my-simple-fix --schema spec-driven
+# Use a different schema for one change (CLI flag; /opsx:propose uses the repo default)
+openspec new change my-simple-fix --schema spec-driven
 
 # Or change project default in openspec/config.yaml: schema: spec-driven
 ```
@@ -416,13 +419,12 @@ Confirms tests are green, presents merge / PR / keep-branch / discard options, c
 | Scenario | Command |
 |---|---|
 | First clone of a project | `bash scripts/install-git-hooks.sh` |
-| New change (interactive) | `/opsx:new <name> --schema superpowers-bridge` then `/opsx:continue` |
-| New change (one-shot) | `/opsx:ff <name>` |
-| Resume an interrupted change | `/opsx:continue <name>` |
-| Enter implementation | `/opsx:apply <name>` |
-| Manual verify | `/opsx:verify <name>` |
+| New change | `/opsx:propose <name>` |
+| Implement a change | `/opsx:apply <name>` |
 | Archive | `/opsx:archive <name>` |
-| Use built-in (skip brainstorm) | `/opsx:new <name> --schema spec-driven` |
+| Inspect a change | `/opsx:explore <name>` |
+| Merge specs into main | `/opsx:sync <name>` |
+| Use spec-driven (lighter, skip brainstorm) | `openspec new change <name> --schema spec-driven` |
 | List all schemas in the project | `openspec schemas` |
 | Inspect a change's progress | `openspec status --change <name> --json` |
 | List active changes | `openspec list` |
@@ -480,11 +482,13 @@ A bundle release `1.x.y` is a published cut of schema major `v1`. A future schem
 
 Baseline versions this schema was authored against. This is a **historical snapshot, not an end-to-end compatibility guarantee** — CI cannot run the full prompt-layer workflow in headless mode, so behavioral compatibility relies on human review when drift fires.
 
-Current bundle release: **`1.0.0`** (git tag `v1.0.0`; see [VERSION](./VERSION)).
+Current bundle release: **`1.1.0`** (git tag `v1.1.0`; see [VERSION](./VERSION)).
 
 | superpowers-bridge | OpenSpec CLI | Superpowers plugin | Baseline as of |
 |---|---|---|---|
 | v1 | `1.4.1` | `v5.1.0` | 2026-06-10 |
+
+> **Command surface vs baseline attestation.** The docs, adopter fragments, and `install.sh` already describe the OpenSpec **v1.5.0** command set (`propose / apply / archive / explore / sync`), and `install.sh` enforces `openspec >= 1.5.0`. The "Baseline as of" date above, however, still records human attestation against `1.4.1`. It will be bumped to `1.5.0` only after a maintainer re-runs a full cycle on `1.5.0` and confirms nothing degraded. In short: the **command surface is v1.5.0**; the **attested baseline is 1.4.1** until verified.
 
 ### How this is checked
 
@@ -493,7 +497,7 @@ The contract is three layers — **baseline declaration + automated drift detect
 | Layer | Mechanism | Catches | When it fires |
 |---|---|---|---|
 | Structural | [`validate-schemas.yml`](../.github/workflows/validate-schemas.yml) on every push/PR; [`version-check.yml`](../.github/workflows/version-check.yml) weekly against latest OpenSpec | Schema-graph breaks (field renames, removed `requires:` edges, PRECHECK syntax changes) | CI run fails red |
-| Drift notification | [`version-check.yml`](../.github/workflows/version-check.yml) weekly, compares baseline above against latest npm / GitHub release | Pinned ≠ latest upstream | Opens / updates a [labelled drift issue](https://github.com/JiangWay/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check) for human review (workflow stays green — drift is normal, not a failure) |
+| Drift notification | [`version-check.yml`](../.github/workflows/version-check.yml) weekly, compares baseline above against latest npm / GitHub release | Pinned ≠ latest upstream | Opens / updates a [labelled drift issue](https://github.com/AllenMuu/openspec-superpowers/issues?q=is%3Aopen+label%3Aupstream-version-check) for human review (workflow stays green — drift is normal, not a failure) |
 | End-to-end workflow | **Not automated** | Behavioral changes inside Superpowers skills (renames, prose rewrites altering PRECHECK semantics, transitive-dependency changes); subtle OpenSpec engine semantic shifts | A human reads upstream release notes when the drift issue fires |
 
 The "Baseline as of" date is bumped when a maintainer manually re-runs a full cycle against the listed versions and confirms nothing degraded. Until then, the date marks human attestation, not an automated test pass.

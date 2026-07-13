@@ -75,7 +75,7 @@ Commit chain (時序):
   - **How to prevent recurrence**: 下一個 cycle 在同類條件下怎麼不再跳?選一:
     - `schema graph fix` — 寫具體要改 schema.yaml 的哪一段
     - `skill description tightening` — 寫具體要改哪個 skill 的 frontmatter / instruction
-    - `CLAUDE.md trigger` — 寫具體要在 adopter CLAUDE.md.fragment 加哪段判讀規則
+    - `routing rule trigger` - 寫具體要在 adopter `.claude/rules/openspec-routing.md` 加哪段判讀規則
     - `scope-judgment rule` — 寫具體 cycle 的 scope 應該被怎麼判讀
     - `one-off — schema boundary case, no prevention possible` — 但需明寫為何 boundary(不接受含糊保留)
 
