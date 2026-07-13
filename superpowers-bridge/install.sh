@@ -12,7 +12,7 @@
 #
 # Usage:
 #   bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh)
-#   ./install.sh [--locale zh-TW]
+#   ./install.sh
 #
 # Idempotent: safe to re-run. Backs up (does NOT rm) any existing schema dir.
 # Does NOT git commit (prints a suggested command at the end).
@@ -27,13 +27,11 @@ RELEASE_TAG="${RELEASE_TAG:-v1.1.0}"
 BASE_URL="${BASE_URL:-https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/${RELEASE_TAG}/superpowers-bridge}"
 SCHEMA_REPO="${SCHEMA_REPO:-https://github.com/AllenMuu/openspec-superpowers.git}"
 DEFAULT_SCHEMA="superpowers-bridge"
-LOCALE="en"
 
 usage() {
   cat <<EOF
-Usage: $0 [--locale zh-TW]
-  --locale zh-TW   Use the Traditional Chinese routing rule (default: en)
-  -h, --help       Show this help
+Usage: $0 [-h|--help]
+  -h, --help    Show this help
 
 Installs superpowers-bridge into the current repo (run from repo root).
 Idempotent. Does not commit.
@@ -42,17 +40,12 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --locale) LOCALE="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage; exit 1 ;;
   esac
 done
 
-case "$LOCALE" in
-  en)    FRAGMENT_NAME="openspec-routing.md" ;;
-  zh-TW) FRAGMENT_NAME="openspec-routing.zh-TW.md" ;;
-  *) echo "ERROR: unsupported --locale '$LOCALE' (use 'en' or 'zh-TW')" >&2; exit 1 ;;
-esac
+FRAGMENT_NAME="openspec-routing.md"
 
 # --- temp cleanup ---------------------------------------------------------------
 CLONE_DIR=""
@@ -134,7 +127,7 @@ else
   cp -R "$CLONE_DIR/repo/superpowers-bridge" openspec/schemas/superpowers-bridge
 fi
 # Strip non-schema files (script + docs) pulled in by cp -R; keep VERSION, schema.yaml, templates/.
-rm -f openspec/schemas/superpowers-bridge/install.sh openspec/schemas/superpowers-bridge/README.md openspec/schemas/superpowers-bridge/README.zh-TW.md
+rm -f openspec/schemas/superpowers-bridge/install.sh openspec/schemas/superpowers-bridge/README.md
 
 # --- 4. default schema ----------------------------------------------------------
 echo "==> [4/6] Set default schema = $DEFAULT_SCHEMA"
@@ -148,7 +141,7 @@ else
 fi
 
 # --- 5. Workflow routing rule (auto-loaded by Claude Code from .claude/rules/) -
-echo "==> [5/6] Write .claude/rules/openspec-routing.md (locale=$LOCALE)"
+echo "==> [5/6] Write .claude/rules/openspec-routing.md"
 FRAGMENT_FILE="$(mktemp)"
 if local_fragment; then
   cp "$SCRIPT_DIR/templates/adopters/$FRAGMENT_NAME" "$FRAGMENT_FILE"
@@ -189,7 +182,7 @@ openspec schema validate superpowers-bridge
 # --- done -----------------------------------------------------------------------
 cat <<EOF
 
-==> Done. superpowers-bridge installed (default schema = $DEFAULT_SCHEMA, locale = $LOCALE).
+==> Done. superpowers-bridge installed (default schema = $DEFAULT_SCHEMA).
 
 Next:
   1. Restart Claude Code so the /opsx:* slash commands load.

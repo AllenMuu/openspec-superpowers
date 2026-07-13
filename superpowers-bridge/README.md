@@ -1,6 +1,6 @@
 # superpowers-bridge Schema
 
-[English](./README.md) · [繁體中文](./README.zh-TW.md)
+**English**
 
 [![Schema Structure](https://github.com/AllenMuu/openspec-superpowers/actions/workflows/validate-schemas.yml/badge.svg?branch=main)](https://github.com/AllenMuu/openspec-superpowers/actions/workflows/validate-schemas.yml)
 [![Upstream Drift](https://img.shields.io/github/issues-search/AllenMuu/openspec-superpowers?query=is%3Aopen%20label%3Aupstream-version-check&label=Upstream%20Drift&color=yellow)](https://github.com/AllenMuu/openspec-superpowers/issues?q=is%3Aopen+label%3Aupstream-version-check)
@@ -25,12 +25,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpower
 
 [`install.sh`](./install.sh) runs `openspec init --tools claude`, installs the schema (backing up any existing copy), sets `superpowers-bridge` as the default schema, writes the v1.5.0 `Workflow routing` rule to `.claude/rules/openspec-routing.md` (auto-loaded by Claude Code; does not modify CLAUDE.md except to migrate legacy sections), gitignores `.claude/settings.local.json`, and validates. Requires `openspec >= 1.5.0` (hard-stops otherwise). Idempotent; does not commit.
 
-For Traditional Chinese routing text:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh) --locale zh-TW
-```
-
 > Requires: `openspec` CLI >= 1.5.0 (`brew install openspec`) and the Superpowers plugin (`claude plugin install superpowers@claude-plugins-official`). The script hard-stops if `openspec` is missing or < 1.5.0, and warns if the plugin is absent.
 
 ### Method 1: Claude Code one-shot prompt (recommended)
@@ -45,7 +39,7 @@ Install the superpowers-bridge schema for OpenSpec into this project:
 3. Copy the `superpowers-bridge/` subdirectory to `openspec/schemas/superpowers-bridge/`.
 4. Run `openspec schema validate superpowers-bridge` to verify.
 5. Run `openspec schemas` and confirm `superpowers-bridge` is listed.
-6. Write the workflow-routing rule to `.claude/rules/openspec-routing.md`, sourced from `openspec/schemas/superpowers-bridge/templates/adopters/openspec-routing.<locale>.md` (auto-detect locale from existing CLAUDE.md content if present; default zh-TW for Traditional Chinese, no suffix for English). Claude Code auto-loads `.claude/rules/` at launch, so no CLAUDE.md edit is needed. If a legacy `## Workflow routing` section exists in CLAUDE.md (from older installs), remove it - the rule file supersedes it.
+6. Write the workflow-routing rule to `.claude/rules/openspec-routing.md`, sourced from `openspec/schemas/superpowers-bridge/templates/adopters/openspec-routing.md`. Claude Code auto-loads `.claude/rules/` at launch, so no CLAUDE.md edit is needed. If a legacy `## Workflow routing` section exists in CLAUDE.md (from older installs), remove it - the rule file supersedes it.
 7. Clean up the temp directory.
 8. Verify Superpowers plugin is installed by running `claude plugin list`.
    If not listed, run `claude plugin install superpowers@claude-plugins-official`.
@@ -82,12 +76,10 @@ Upgrade the superpowers-bridge schema in this project:
 3. Show me the diff between the local `openspec/schemas/superpowers-bridge/` and the cloned `superpowers-bridge/` (use `diff -ruN`). Wait for my ack before overwriting.
 4. After my ack, overwrite the local schema dir with the cloned one.
 5. Run `openspec schema validate superpowers-bridge` to verify.
-6. Refresh the routing rule at `.claude/rules/openspec-routing.md` from `superpowers-bridge/templates/adopters/openspec-routing.<locale>.md` (show me the diff first; wait for my ack before overwriting). Also scan `CLAUDE.md` for a legacy `## Workflow routing` section (left by older installs that wrote into CLAUDE.md); if found, offer to remove it - the rule file now carries that content.
+6. Refresh the routing rule at `.claude/rules/openspec-routing.md` from `superpowers-bridge/templates/adopters/openspec-routing.md` (show me the diff first; wait for my ack before overwriting). Also scan `CLAUDE.md` for a legacy `## Workflow routing` section (left by older installs that wrote into CLAUDE.md); if found, offer to remove it - the rule file now carries that content.
 7. Clean up the temp directory.
 8. Show me the final state.
 ```
-
-> `<locale>` defaults to `zh-TW` if your CLAUDE.md is in Traditional Chinese, or no suffix (English). Claude detects from existing CLAUDE.md content; if there's no CLAUDE.md, it defaults to English.
 
 ### Upgrade Method 2: Manual bash
 
@@ -107,7 +99,7 @@ cd ~/your-project && openspec schema validate superpowers-bridge
 
 # 5. Routing rule (manual)
 # Copy /tmp/oss-upgrade/superpowers-bridge/templates/adopters/openspec-routing.md
-#   (or openspec-routing.zh-TW.md) to .claude/rules/openspec-routing.md
+#   to .claude/rules/openspec-routing.md
 # Claude Code auto-loads .claude/rules/; remove any legacy '## Workflow routing'
 #   section from CLAUDE.md (older installs put it there)
 
@@ -541,7 +533,6 @@ If a Superpowers skill is unavailable:
 
 - [schema.yaml](./schema.yaml) — machine-readable schema definition
 - [templates/](./templates/) — markdown templates per artifact
-- [README.zh-TW.md](./README.zh-TW.md) — 繁體中文版
 - [obra/superpowers](https://github.com/obra/superpowers) — Superpowers skill source
 - [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) — OpenSpec
 - [OpenSpec PR #970](https://github.com/Fission-AI/OpenSpec/pull/970) — original review thread that drove this design

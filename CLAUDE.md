@@ -2,7 +2,7 @@
 
 > 給 Claude Code 在這個 repo 工作時的脈絡指引。維持繁體中文書寫。
 >
-> 關於這個 repo「是什麼、為什麼存在、有哪些 bridges」 → 看 [README.md](./README.md)(英文)或 [README.zh-TW.md](./README.zh-TW.md)(繁中)。
+> 關於這個 repo「是什麼、為什麼存在、有哪些 bridges」 → 看 [README.md](./README.md)(英文)或 [README.zh-CN.md](./README.zh-CN.md)(簡中)。
 > 本檔聚焦 Claude 在這個 repo 工作時需要知道的**慣例與紅旗**。
 
 ---
@@ -12,7 +12,7 @@
 ```
 openspec-schemas/                     ← 本 repo
 ├── README.md                         ← 英文,GitHub 預設 render
-├── README.zh-TW.md                   ← 繁中,有切換連結
+├── README.zh-CN.md                   ← 簡中,有切換連結
 ├── CLAUDE.md                         ← 你正在讀的(繁中,給 Claude 看)
 ├── LICENSE                           ← MIT
 ├── .gitignore
@@ -20,12 +20,12 @@ openspec-schemas/                     ← 本 repo
 │   ├── validate-schemas.yml          ← CI 對每個 bridge 跑 openspec schema validate
 │   └── version-check.yml             ← 每週驗證 upstream OpenSpec / Superpowers,落後就開 issue
 ├── docs/
-│   ├── roadmap.md / .zh-TW.md        ← 公開 roadmap
+│   ├── roadmap.md                    ← 公開 roadmap
 │   └── superpowers/
 │       ├── specs/                    ← 設計 spec(brainstorming 產出)
 │       └── plans/                    ← 實作 plan(writing-plans 產出)
 └── superpowers-bridge/                ← 第一個 bridge,自包式 schema bundle
-    ├── README.md / .zh-TW.md         ← 完整 bridge 文件(含 install + integration runbook)
+    ├── README.md                      ← 完整 bridge 文件(含 install + integration runbook)
     ├── schema.yaml                   ← OpenSpec 讀的 schema 定義
     └── templates/                    ← artifact 模板
         ├── brainstorm.md
@@ -46,21 +46,21 @@ openspec-schemas/                     ← 本 repo
   - repo:`openspec-schemas`(複數,可長多個 bridge)
   - bridge dir / schema name:`superpowers-bridge`(單數)
   - 不用 PascalCase(雖然 OpenSpec 自身 repo 用 `OpenSpec`,但他們的 CLI / npm package 都是 lowercase,我們對齊功能性命名)
-- **Locale 編碼**:用 `zh-TW`(繁中)、`zh-CN`(簡中);避免裸寫 `zh`
+- **Locale 編碼**:用 `zh-CN`(簡中);避免裸寫 `zh`
 
 ## 雙語策略
 
 | 檔案類型 | 語言 |
 |---------|------|
-| 入口 `README.md` | 英文 canonical + `README.zh-TW.md` 翻譯 + 頂端切換連結 |
+| 入口 `README.md` | 英文 canonical + `README.zh-CN.md` 翻譯 + 頂端切換連結 |
 | `CLAUDE.md`(這份) | 繁中(給維護者 + Claude;國際讀者從 README 入口進來) |
-| `docs/roadmap.md` | 英文 canonical + `.zh-TW.md` 翻譯 + 切換連結 |
-| `superpowers-bridge/README.md` | 英文 canonical + `.zh-TW.md` 翻譯 + 切換連結 |
+| `docs/roadmap.md` | 英文 canonical(單語) |
+| `superpowers-bridge/README.md` | 英文 canonical(單語) |
 | `schema.yaml`、`templates/*.md` | 英文(機器讀 + 國際讀者) |
 | Commit message | 英文(國際慣例) |
 | Code comment | 英文 |
 
-**翻譯同步原則**:英文 canonical,翻譯版可能滯後。修改英文版時若 schema / 工作流發生實質變動,要同步更新繁中版。小改動允許先英文後繁中。
+**翻譯同步原則**:英文 canonical,簡中翻譯版可能滯後。修改英文版時若 schema / 工作流發生實質變動,要同步更新簡中版。小改動允許先英文後簡中。
 
 ## Schema 修改流程
 
@@ -73,7 +73,7 @@ openspec-schemas/                     ← 本 repo
    openspec schema validate <bridge-name>
    openspec schemas
    ```
-3. 若有時序錯位 / 錯誤行為更動,**也要同步更新 `superpowers-bridge/README.md` 的「六個值得記住的設計觸點」段**(尤其是 verify/retrospective 時序錯位那段),並同步繁中版。
+3. 若有時序錯位 / 錯誤行為更動,**也要同步更新 `superpowers-bridge/README.md` 的「六個值得記住的設計觸點」段**(尤其是 verify/retrospective 時序錯位那段)。bridge README 僅英文,無翻譯版需同步。
 4. Commit message 用英文,符合 conventional commits(`feat:`、`fix:`、`refactor:`、`chore:`、`docs:`、`ci:`)
 5. push 觸發 CI
 

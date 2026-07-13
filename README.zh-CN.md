@@ -6,7 +6,7 @@
 [![Superpowers](https://img.shields.io/badge/Superpowers-v5.1.0-0277bd)](https://github.com/obra/superpowers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-[English](./README.md) · **简体中文** · [繁體中文](./README.zh-TW.md)
+[English](./README.md) · **简体中文**
 
 > 社区贡献的 [OpenSpec](https://github.com/Fission-AI/OpenSpec) schema 集合,把 OpenSpec 的 artifact 治理(解决**做什么**)与 [obra/superpowers](https://github.com/obra/superpowers) 的执行技能(解决**怎么做**)桥接起来 —— 一个自包含 bundle,一条命令即可安装。
 
@@ -18,12 +18,6 @@
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh)
-```
-
-如需繁体中文的路由规则文本,追加 `--locale zh-TW`:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh) --locale zh-TW
 ```
 
 > 脚本内部已 pin 到发布标签 `v1.1.0`,因此即使从 `main` 分支拉取脚本,它写入的 schema 与路由规则也是可复现的。若想连同脚本本身一起 pin,把 URL 中的 `main` 换成 `v1.1.0` 即可。

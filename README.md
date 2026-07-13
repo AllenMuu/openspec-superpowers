@@ -6,7 +6,7 @@
 [![Superpowers](https://img.shields.io/badge/Superpowers-v5.1.0-0277bd)](https://github.com/obra/superpowers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-**English** · [简体中文](./README.zh-CN.md) · [繁體中文](./README.zh-TW.md)
+**English** · [简体中文](./README.zh-CN.md)
 
 > Community-contributed [OpenSpec](https://github.com/Fission-AI/OpenSpec) schemas that bridge OpenSpec's artifact governance (the **what**) with [obra/superpowers](https://github.com/obra/superpowers) execution skills (the **how**) - one self-contained bundle you install with a single command.
 
@@ -18,12 +18,6 @@ From your **target repo root** (the project you want to add OpenSpec + Superpowe
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh)
-```
-
-For Traditional Chinese routing text, append `--locale zh-TW`:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh) --locale zh-TW
 ```
 
 > The script is pinned internally to release tag `v1.1.0`, so the schema + routing rule it writes stay reproducible even when you fetch the script from `main`. To pin the script itself, swap `main` for `v1.1.0` in the URL.
