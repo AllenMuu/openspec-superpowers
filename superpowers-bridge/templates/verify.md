@@ -1,6 +1,6 @@
 # Verification Report
 
-> 此檔案由 `openspec-verify-change` skill 在 apply 完成後產生，用以確認實作
+> 此檔案由 `verify` artifact (透過 `openspec instructions verify`) 在 apply 完成後產生，用以確認實作
 > 與 specs / design / tasks 的一致性。失敗的檢查須返回對應 artifact 修正後
 > 再重跑 verify。
 

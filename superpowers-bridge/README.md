@@ -257,7 +257,7 @@ flowchart TD
         A0["<b>0. Pre-flight skill check</b>"]
         A1["<b>1. Workspace</b><br/><i>using-git-worktrees</i>"]
         A2["<b>2. Executor</b><br/><i>subagent-driven-development</i><br/>↳ TDD + code-review (transitive)"]
-        A3["<b>3. Verification</b><br/><i>openspec-verify-change</i> → verify.md"]
+        A3["<b>3. Verification</b><br/><i>verify artifact</i> → verify.md"]
         A4["<b>4. Retrospective</b> → retrospective.md<br/>(BEFORE PR; hot context)"]
         A5["<b>5. Archive</b><br/><i>openspec archive -y</i><br/>(sync delta + move folder)"]
         A6["<b>6. Completion</b><br/><i>finishing-a-development-branch</i><br/>🏁 PR is LAST"]
@@ -292,9 +292,9 @@ APPLY ━━━━━━━━━━━━━━━━━━━━━━━━�
   0. Pre-flight skill check
   1. superpowers:using-git-worktrees
   2. superpowers:subagent-driven-development (+ TDD + code-review transitive)
-  3. openspec-verify-change → verify.md ◄┐
-                              │           │ blocking → fix
-                              ▼           │
+  3. verify artifact -> verify.md ◄┐
+                      │            │ blocking -> fix
+                      ▼            │
   4. retrospective.md (BEFORE PR; hot context)
   5. openspec archive -y (sync delta + move folder)
   6. superpowers:finishing-a-development-branch (🏁 PR is LAST)
@@ -317,7 +317,7 @@ APPLY ━━━━━━━━━━━━━━━━━━━━━━━━�
 | 6 | `superpowers:requesting-code-review` | (activated inside #4) | **Transitive** |
 | 7 | `superpowers:finishing-a-development-branch` | apply step 4 | Direct |
 
-Plus one OpenSpec built-in: `openspec-verify-change` (apply step 3, produces `verify.md`).
+Plus the `verify` artifact (apply step 3, produces `verify.md` via `openspec instructions verify`).
 
 > **No `executing-plans` fallback.** This schema is opinionated: it requires a subagent-capable platform (Claude Code, Codex, etc.). The alternative executor `superpowers:executing-plans` does not transitively activate TDD or code-review (verified against its [SKILL.md](https://github.com/obra/superpowers/blob/main/skills/executing-plans/SKILL.md)) — falling back would silently degrade Superpowers' core value. If your platform lacks subagent support, use the built-in `spec-driven` schema instead.
 
@@ -390,7 +390,7 @@ Coarse `tasks.md` checkboxes tick as tasks complete. After all tasks, a final co
 
 This schema does NOT support `superpowers:executing-plans` as a fallback. See the "Six design touches" section below for rationale.
 
-#### 3. Verification — `openspec-verify-change`
+#### 3. Verification - `verify` artifact
 
 Produces `verify.md` from 7 checks: structural validation (`openspec validate --all --json`), task completion, delta-spec sync state, design/specs coherence (non-blocking warning), implementation signal (committed code), front-door routing leak detector (non-blocking warning), and deferred-dogfood vs automated-test equivalence. The last check blocks only when `plan.md` has `[~]` deferrals but the equivalence section is empty (gap analysis skipped); otherwise it is informational.
 

@@ -209,11 +209,14 @@ artifacts:
       2. Task progress (must return > 0):
          grep -c '^- \[x\]' openspec/changes/<change-name>/tasks.md
 
-      Only after BOTH return positive numbers, proceed to invoke
-      the verification skill below.
+      Only after BOTH return positive numbers, proceed to
+      produce the verify artifact below.
 
-      Use the Skill tool to invoke **openspec-verify-change** (the
-      `/opsx:verify` slash command is its user-facing equivalent).
+      Produce `verify.md` by performing the checks below. (The
+      historical `openspec-verify-change` skill and `/opsx:verify`
+      slash command were removed in OpenSpec v1.2.0; the `verify`
+      artifact instruction - fetched via `openspec instructions
+      verify --change <name>` - is now the sole entry point.)
 
       IMPORTANT timing note:
       - Unlike other artifacts, verify.md is produced AFTER the apply
@@ -295,9 +298,9 @@ artifacts:
       Verify MAY be re-run multiple times as the implementation is
       refined — each run overwrites verify.md with current state.
 
-      If `openspec-verify-change` skill is unavailable, fall back to
-      running the numbered checks above manually and recording results
-      in verify.md.
+      The numbered checks above are self-contained - perform them
+      directly and record results in `verify.md`. No external skill
+      is required.
     requires:
       - plan
 
@@ -525,9 +528,10 @@ apply:
        `spec-driven` schema instead of this one.
 
     3. **Verification**: When all tasks are done, produce the
-       `verify` artifact by invoking **openspec-verify-change**
-       to check completeness, correctness, and coherence.
-       Re-run verify until all blocking issues are resolved.
+       `verify` artifact by running `openspec instructions verify
+       --change <name>` (returns the verify instruction + template),
+       then perform its checks and write `verify.md`. Re-run verify
+       until all blocking issues are resolved.
 
     4. **Retrospective (write while context is hot)**:
 
