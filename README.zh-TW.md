@@ -1,6 +1,6 @@
 # openspec-schemas
 
-[English](./README.md) · [繁體中文](./README.zh-TW.md)
+[English](./README.md) · [简体中文](./README.zh-CN.md) · **繁體中文**
 
 社群貢獻的 [OpenSpec](https://github.com/Fission-AI/OpenSpec) schema 集合。每個 schema 都是一個自包式 bundle —— 把它複製到你專案的 `openspec/schemas/` 目錄,然後用 `--schema <name>` 在每次 change 個別選擇。
 
