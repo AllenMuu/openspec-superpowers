@@ -93,6 +93,7 @@ PR #970 review 提出三個顧慮,本 schema 在 v1 已具體應對。Claude 在
 - ❌ 拿掉某個 PRECHECK 但沒換更強的替代品
 - ❌ 把 verify / retrospective 從 artifact 拉掉但沒在 README「設計觸點」段同步更新限制
 - ❌ 改 schema name 但沒同步改 bridge 內所有文件 + 頂層 README 的 bridge 索引
+- ❌ 改 routing fragment 的路由邏輯但沒同步更新命令映射表(Claude `/opsx:` vs Codex `openspec-*` skill)
 
 ## 相關連結
 

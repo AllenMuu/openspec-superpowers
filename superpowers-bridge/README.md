@@ -20,12 +20,20 @@
 From your target repo root:
 
 ```bash
+# Claude Code (default)
 bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh)
+
+# Codex CLI (or any non-Claude agent supported by `openspec init --tools`)
+bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh) --tool codex
 ```
 
-[`install.sh`](./install.sh) runs `openspec init --tools claude`, installs the schema (backing up any existing copy), sets `superpowers-bridge` as the default schema, writes the v1.5.0 `Workflow routing` rule to `.claude/rules/openspec-routing.md` (auto-loaded by Claude Code; does not modify CLAUDE.md except to migrate legacy sections), gitignores `.claude/settings.local.json`, and validates. Requires `openspec >= 1.5.0` (hard-stops otherwise). Idempotent; does not commit.
+`--tool <name>` (default `claude`) sets `openspec init --tools <name>` and where the routing rule lands:
+- **`claude`** -> `.claude/rules/openspec-routing.md` (auto-loaded by Claude Code at launch)
+- **any other** (codex, cursor, ...) -> `openspec/routing.md` + a bridge line in `AGENTS.md` (since `.claude/` is not read by those agents)
 
-> Requires: `openspec` CLI >= 1.5.0 (`brew install openspec`) and the Superpowers plugin (`claude plugin install superpowers@claude-plugins-official`). The script hard-stops if `openspec` is missing or < 1.5.0, and warns if the plugin is absent.
+[`install.sh`](./install.sh) installs the schema (backing up any existing copy), sets `superpowers-bridge` as the default schema, writes the routing rule per `--tool` above, gitignores `.claude/settings.local.json`, and validates. Requires `openspec >= 1.5.0` (hard-stops otherwise). Idempotent; does not commit.
+
+> Requires: `openspec` CLI >= 1.5.0 (`brew install openspec`) and the Superpowers plugin for your agent (Claude Code: `claude plugin install superpowers@claude-plugins-official`; Codex: `/plugins` -> search "superpowers"; see [obra/superpowers](https://github.com/obra/superpowers) for other agents). The script hard-stops if `openspec` is missing or < 1.5.0, and warns if the plugin is absent.
 
 ### Method 1: Claude Code one-shot prompt (recommended)
 

@@ -17,8 +17,14 @@
 From your **target repo root** (the project you want to add OpenSpec + Superpowers to), run:
 
 ```bash
+# Claude Code (default)
 bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh)
+
+# Codex CLI (or other agents: codex, cursor, gemini, ...)
+bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh) --tool codex
 ```
+
+`--tool` (default `claude`) sets the agent harness. Claude Code writes the routing rule to `.claude/rules/` (auto-loaded); other agents write it to `openspec/routing.md` + a bridge line in `AGENTS.md`.
 
 > The script is pinned internally to release tag `v1.1.0`, so the schema + routing rule it writes stay reproducible even when you fetch the script from `main`. To pin the script itself, swap `main` for `v1.1.0` in the URL.
 
@@ -27,7 +33,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpower
 | Requirement | Install | Notes |
 |-------------|---------|-------|
 | `openspec` CLI ≥ 1.5.0 | `brew install openspec` | Script hard-stops if missing or < 1.5.0 (needs the v1.5.0 command set: `propose` / `apply` / `archive` / `explore` / `sync`) |
-| Superpowers plugin | `claude plugin install superpowers@claude-plugins-official` | Script warns (does not stop) if absent |
+| Superpowers plugin | Claude: `claude plugin install superpowers@claude-plugins-official`; Codex: `/plugins` → "superpowers"; others: see [obra/superpowers](https://github.com/obra/superpowers) | Script warns (does not stop) if absent |
 | `git` | — | Required for the schema clone |
 
 ### What the installer does
@@ -37,20 +43,20 @@ bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpower
 | # | Step | Result |
 |---|------|--------|
 | 1 | Precheck | Verifies `git`, `openspec ≥ 1.5.0`, and warns if the Superpowers plugin is missing |
-| 2 | `openspec init --tools claude --force` | Creates `.claude/commands/opsx/*` and `.claude/skills/openspec-*/*` |
+| 2 | `openspec init --tools <tool> --force` | Creates tool-specific skills/commands (Claude: `.claude/commands/opsx/*` + `.claude/skills/openspec-*/*`; Codex: `.codex/skills/openspec-*/*`) |
 | 3 | Install schema | Copies `superpowers-bridge/` into `openspec/schemas/` (backs up any existing copy instead of deleting it) |
 | 4 | Set default schema | Writes `schema: superpowers-bridge` to `openspec/config.yaml` |
-| 5 | Workflow routing rule | Writes the v1.5.0-aligned rule to `.claude/rules/openspec-routing.md` (auto-loaded by Claude Code; migrates away any legacy `## Workflow routing` section in `CLAUDE.md`) |
+| 5 | Workflow routing rule | Claude: writes to `.claude/rules/openspec-routing.md` (auto-loaded); other agents: writes to `openspec/routing.md` + a bridge line in `AGENTS.md` |
 | 6 | Gitignore + validate | Ensures `.claude/settings.local.json` is gitignored, then runs `openspec schema validate` |
 
 ### After install
 
-1. **Restart Claude Code** so the `/opsx:*` slash commands load.
-2. Start a change: `/opsx:propose <name>`
+1. **Restart your agent** so the new skills/commands load.
+2. Start a change. Claude Code: `/opsx:propose <name>`. Codex/other: trigger the `openspec-propose` skill, or run `openspec new change <name>` (see `openspec/routing.md` for the command map).
 3. v1.5.0 command set: `propose` / `apply` / `archive` / `explore` / `sync` (there is no `/opsx:new`, `/opsx:ff`, `/opsx:continue`, or `/opsx:verify` in v1.5.0)
 4. When ready, commit the generated files:
    ```bash
-   git add .claude/ openspec/ CLAUDE.md .gitignore
+   git add .claude/ openspec/ AGENTS.md CLAUDE.md .gitignore
    git commit -m "chore(openspec): install superpowers-bridge"
    ```
 

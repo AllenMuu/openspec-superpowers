@@ -3,11 +3,13 @@
 # superpowers-bridge one-click installer
 #
 # Installs OpenSpec + Superpowers integration into the current repo:
-#   1. openspec init --tools claude  -> .claude/commands/opsx/* + .claude/skills/openspec-*/*
+#   1. openspec init --tools <tool>  -> tool-specific skills/commands (claude/codex/...)
 #   2. superpowers-bridge schema     -> openspec/schemas/superpowers-bridge/
 #   3. default schema                -> openspec/config.yaml (schema: superpowers-bridge)
-#   4. .claude/rules/openspec-routing.md -> auto-loaded routing rule (v1.5.0-aligned)
-#   5. .claude/settings.local.json   -> gitignored (local-only)
+#   4. workflow routing rule:
+#        claude  -> .claude/rules/openspec-routing.md (auto-loaded by Claude Code)
+#        other   -> openspec/routing.md + a bridge line in AGENTS.md
+#   5. .claude/settings.local.json   -> gitignored (local-only, Claude Code)
 #   6. openspec schema validate      -> verifies
 #
 # Usage:
@@ -30,16 +32,23 @@ DEFAULT_SCHEMA="superpowers-bridge"
 
 usage() {
   cat <<EOF
-Usage: $0 [-h|--help]
-  -h, --help    Show this help
+Usage: $0 [--tool <name>] [-h|--help]
+  --tool <name>   AI agent harness (default: claude). Sets openspec init
+                  --tools <name> and where the routing rule lands:
+                    claude  -> .claude/rules/openspec-routing.md (auto-loaded)
+                    <other> -> openspec/routing.md + bridge line in AGENTS.md
+                  Common values: claude, codex, cursor, gemini, github-copilot.
+  -h, --help      Show this help
 
 Installs superpowers-bridge into the current repo (run from repo root).
 Idempotent. Does not commit.
 EOF
 }
 
+TOOL="claude"
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --tool) TOOL="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage; exit 1 ;;
   esac
@@ -95,18 +104,30 @@ if (( os_major < 1 || (os_major == 1 && os_minor < 5) )); then
   echo "       Upgrade with: brew upgrade openspec" >&2
   exit 1
 fi
-if command -v claude >/dev/null; then
-  if ! claude plugin list 2>/dev/null | grep -q 'superpowers'; then
-    echo "WARN: superpowers plugin not detected in 'claude plugin list'." >&2
-    echo "      Install with: claude plugin install superpowers@claude-plugins-official" >&2
-  fi
-else
-  echo "WARN: 'claude' not on PATH; cannot verify the superpowers plugin." >&2
-fi
+case "$TOOL" in
+  claude)
+    if command -v claude >/dev/null; then
+      if ! claude plugin list 2>/dev/null | grep -q 'superpowers'; then
+        echo "WARN: superpowers plugin not detected in 'claude plugin list'." >&2
+        echo "      Install with: claude plugin install superpowers@claude-plugins-official" >&2
+      fi
+    else
+      echo "WARN: 'claude' not on PATH; cannot verify the superpowers plugin." >&2
+    fi
+    ;;
+  codex)
+    echo "NOTE: ensure the superpowers plugin is installed in Codex" >&2
+    echo "      (run /plugins, search 'superpowers'; see https://github.com/obra/superpowers#codex-cli)." >&2
+    ;;
+  *)
+    echo "NOTE: ensure the superpowers plugin is installed for your '$TOOL' agent" >&2
+    echo "      (see https://github.com/obra/superpowers)." >&2
+    ;;
+esac
 
 # --- 2. openspec init -----------------------------------------------------------
-echo "==> [2/6] openspec init --tools claude --force"
-openspec init --tools claude --force
+echo "==> [2/6] openspec init --tools $TOOL --force"
+openspec init --tools "$TOOL" --force
 
 # --- 3. install / refresh schema ------------------------------------------------
 echo "==> [3/6] Install superpowers-bridge schema"
@@ -140,8 +161,11 @@ else
   printf 'schema: %s\n\n' "$DEFAULT_SCHEMA" | cat - "$cfg" > "$cfg.tmp" && mv "$cfg.tmp" "$cfg"
 fi
 
-# --- 5. Workflow routing rule (auto-loaded by Claude Code from .claude/rules/) -
-echo "==> [5/6] Write .claude/rules/openspec-routing.md"
+# --- 5. Workflow routing rule ---------------------------------------------------
+# Claude Code: write to .claude/rules/ (auto-loaded at launch).
+# Other agents (Codex, etc.): write to openspec/routing.md + a bridge line in
+# AGENTS.md (the agent's native instruction file), since .claude/ is not read.
+echo "==> [5/6] Write workflow routing rule (tool=$TOOL)"
 FRAGMENT_FILE="$(mktemp)"
 if local_fragment; then
   cp "$SCRIPT_DIR/templates/adopters/$FRAGMENT_NAME" "$FRAGMENT_FILE"
@@ -152,20 +176,39 @@ fi
 fragment_body="${FRAGMENT_FILE}.body"
 grep -v '^<!--' "$FRAGMENT_FILE" > "$fragment_body"
 
-# Migrate: strip any legacy "## Workflow routing" section previously written
-# into CLAUDE.md by older installers. New installs write a rule file instead
-# (auto-loaded from .claude/rules/, so CLAUDE.md no longer needs the section).
-if [[ -f CLAUDE.md ]] && grep -qE '^##[[:space:]]+[Ww]orkflow[[:space:]]+[Rr]outing' CLAUDE.md; then
-  echo "    migrating: removing legacy '## Workflow routing' section from CLAUDE.md"
+# strip_workflow_section <file>: remove an existing "## Workflow routing" section.
+strip_workflow_section() {
+  local f="$1"
+  [[ -f "$f" ]] || return 0
   awk 'BEGIN{skip=0}
        /^##[[:space:]]+[Ww]orkflow[[:space:]]+[Rr]outing/{skip=1; next}
        skip==1 && /^## /{skip=0}
-       skip==0{print}' CLAUDE.md > CLAUDE.md.tmp && mv CLAUDE.md.tmp CLAUDE.md
-fi
+       skip==0{print}' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+}
 
-# Write the rule file (installer-owned; safe to overwrite on upgrade).
-mkdir -p .claude/rules
-cp "$fragment_body" .claude/rules/openspec-routing.md
+if [[ "$TOOL" == "claude" ]]; then
+  # Migrate: strip any legacy "## Workflow routing" section from CLAUDE.md
+  # (older installers wrote it there; now it lives in .claude/rules/).
+  if grep -qE '^##[[:space:]]+[Ww]orkflow[[:space:]]+[Rr]outing' CLAUDE.md 2>/dev/null; then
+    echo "    migrating: removing legacy '## Workflow routing' section from CLAUDE.md"
+    strip_workflow_section CLAUDE.md
+  fi
+  mkdir -p .claude/rules
+  cp "$fragment_body" .claude/rules/openspec-routing.md
+else
+  # Non-Claude: routing body to openspec/routing.md + bridge line in AGENTS.md.
+  mkdir -p openspec
+  cp "$fragment_body" openspec/routing.md
+  touch AGENTS.md
+  # Idempotent: replace any existing bridge section before appending the fresh one.
+  strip_workflow_section AGENTS.md
+  cat >> AGENTS.md <<'BRIDGE'
+
+## Workflow routing
+
+On session start, read and follow [`openspec/routing.md`](./openspec/routing.md) for workflow routing (when to use OpenSpec changes vs a direct PR, and how to trigger propose/apply/archive/explore/sync).
+BRIDGE
+fi
 rm -f "$fragment_body"
 
 # --- 6. gitignore local settings ------------------------------------------------
@@ -182,20 +225,40 @@ openspec schema validate superpowers-bridge
 # --- done -----------------------------------------------------------------------
 cat <<EOF
 
-==> Done. superpowers-bridge installed (default schema = $DEFAULT_SCHEMA).
+==> Done. superpowers-bridge installed (default schema = $DEFAULT_SCHEMA, tool = $TOOL).
 
 Next:
-  1. Restart Claude Code so the /opsx:* slash commands load.
+  1. Restart your agent so the new skills/commands load.
+EOF
+if [[ "$TOOL" == "claude" ]]; then
+  cat <<EOF
   2. Start a change:  /opsx:propose <name>
      v1.5.0 commands: propose / apply / archive / explore / sync
      (there is no /opsx:new, /opsx:ff, /opsx:continue, or /opsx:verify in v1.5.0)
+EOF
+else
+  cat <<EOF
+  2. Start a change:  trigger the openspec-propose skill, or run `openspec new change <name>`.
+     See openspec/routing.md for the command map (propose/apply/archive/explore/sync).
+EOF
+fi
+cat <<EOF
 
 Uncommitted changes in this repo:
 EOF
 git status --short 2>/dev/null || echo "    (not a git repo)"
-cat <<EOF
+if [[ "$TOOL" == "claude" ]]; then
+  cat <<EOF
 
 When ready, commit (example):
   git add .claude/ openspec/ CLAUDE.md .gitignore
   git commit -m "chore(openspec): install superpowers-bridge"
 EOF
+else
+  cat <<EOF
+
+When ready, commit (example):
+  git add .codex/ openspec/ AGENTS.md .gitignore
+  git commit -m "chore(openspec): install superpowers-bridge"
+EOF
+fi

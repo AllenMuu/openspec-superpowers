@@ -4,7 +4,21 @@
 
 ## Workflow routing (read on session start)
 
-This repo uses [`superpowers-bridge`](https://github.com/AllenMuu/openspec-superpowers/tree/main/superpowers-bridge) as the **default** workflow schema, integrating OpenSpec (what to do) with Superpowers (how to do it: brainstorming, writing-plans, git-worktrees, subagent-driven-development, TDD, code-review). Integration rules (language, artifact paths, PRECHECK) follow that bridge's README; this section is the routing guidance for Claude.
+This repo uses [`superpowers-bridge`](https://github.com/AllenMuu/openspec-superpowers/tree/main/superpowers-bridge) as the **default** workflow schema, integrating OpenSpec (what to do) with Superpowers (how to do it: brainstorming, writing-plans, git-worktrees, subagent-driven-development, TDD, code-review). Integration rules (language, artifact paths, PRECHECK) follow that bridge's README; this section is the routing guidance for the agent.
+
+### Command map (propose / apply / archive / explore / sync)
+
+The v1.5.0 OpenSpec command set is `propose / apply / archive / explore / sync`. How you trigger each step depends on your agent harness:
+
+| Step | Claude Code | Codex CLI | Other agents |
+|---|---|---|---|
+| propose | `/opsx:propose` | openspec-propose skill, or `openspec new change` | `openspec new change` |
+| apply | `/opsx:apply` | openspec-apply-change skill | apply tasks per instructions |
+| archive | `/opsx:archive` | openspec-archive-change skill | `openspec archive` |
+| explore | `/opsx:explore` | openspec-explore skill | `openspec list` / `openspec show` |
+| sync | `/opsx:sync` | openspec-sync-specs skill | `openspec spec` |
+
+> Commands below use the Claude Code `/opsx:` form as the canonical example. On Codex or other agents, substitute the equivalent skill or CLI command from the map above.
 
 **Default schema = `superpowers-bridge`** (set in `openspec/config.yaml`). `/opsx:propose` therefore runs the full aggregated flow by default: `brainstorm -> proposal -> design -> specs -> tasks -> plan -> [apply] -> verify -> retrospective`. For lighter changes pass `--schema spec-driven` to `openspec new change`. Trivial fixes skip opsx entirely (direct PR).
 

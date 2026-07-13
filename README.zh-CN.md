@@ -17,8 +17,14 @@
 在你的**目标仓库根目录**(即你想接入 OpenSpec + Superpowers 的项目)下执行:
 
 ```bash
+# Claude Code(默认)
 bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh)
+
+# Codex CLI(或其他 agent:codex、cursor、gemini 等)
+bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh) --tool codex
 ```
+
+`--tool`(默认 `claude`)指定 agent 平台。Claude Code 把路由规则写入 `.claude/rules/`(自动加载);其他平台写入 `openspec/routing.md` + `AGENTS.md` 里的一行桥接。
 
 > 脚本内部已 pin 到发布标签 `v1.1.0`,因此即使从 `main` 分支拉取脚本,它写入的 schema 与路由规则也是可复现的。若想连同脚本本身一起 pin,把 URL 中的 `main` 换成 `v1.1.0` 即可。
 
@@ -27,7 +33,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpower
 | 要求 | 安装命令 | 说明 |
 |------|----------|------|
 | `openspec` CLI ≥ 1.5.0 | `brew install openspec` | 缺失或版本 < 1.5.0 时脚本直接中止(需要 v1.5.0 命令集:`propose` / `apply` / `archive` / `explore` / `sync`) |
-| Superpowers 插件 | `claude plugin install superpowers@claude-plugins-official` | 缺失时脚本只警告、不中止 |
+| Superpowers 插件 | Claude:`claude plugin install superpowers@claude-plugins-official`;Codex:`/plugins` -> "superpowers";其他:见 [obra/superpowers](https://github.com/obra/superpowers) | 缺失时脚本只警告、不中止 |
 | `git` | - | 克隆 schema 时需要 |
 
 ### 安装脚本做了什么
@@ -37,20 +43,20 @@ bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpower
 | # | 步骤 | 结果 |
 |---|------|------|
 | 1 | 前置检查 | 校验 `git`、`openspec ≥ 1.5.0`,并在 Superpowers 插件缺失时给出警告 |
-| 2 | `openspec init --tools claude --force` | 生成 `.claude/commands/opsx/*` 与 `.claude/skills/openspec-*/*` |
+| 2 | `openspec init --tools <tool> --force` | 生成平台对应的 skills/commands(Claude:`.claude/commands/opsx/*` + `.claude/skills/openspec-*/*`;Codex:`.codex/skills/openspec-*/*`) |
 | 3 | 安装 schema | 把 `superpowers-bridge/` 复制进 `openspec/schemas/`(若已存在则备份而非删除) |
 | 4 | 设置默认 schema | 在 `openspec/config.yaml` 写入 `schema: superpowers-bridge` |
-| 5 | 工作流路由规则 | 把 v1.5.0 对齐的路由规则写入 `.claude/rules/openspec-routing.md`(由 Claude Code 自动加载;并迁移掉 `CLAUDE.md` 中遗留的 `## Workflow routing` 段) |
+| 5 | 工作流路由规则 | Claude:写入 `.claude/rules/openspec-routing.md`(自动加载);其他平台:写入 `openspec/routing.md` + `AGENTS.md` 桥接行 |
 | 6 | gitignore + 校验 | 确保 `.claude/settings.local.json` 被 gitignore,然后执行 `openspec schema validate` |
 
 ### 安装完成后
 
-1. **重启 Claude Code**,让 `/opsx:*` 斜杠命令加载生效。
-2. 发起一次变更:`/opsx:propose <name>`
+1. **重启你的 agent**,让新的 skills/commands 加载生效。
+2. 发起一次变更。Claude Code:`/opsx:propose <name>`。Codex/其他:触发 `openspec-propose` skill,或运行 `openspec new change <name>`(命令映射见 `openspec/routing.md`)。
 3. v1.5.0 命令集:`propose` / `apply` / `archive` / `explore` / `sync`(v1.5.0 中**没有** `/opsx:new`、`/opsx:ff`、`/opsx:continue`、`/opsx:verify`)
 4. 准备就绪后,提交生成的文件:
    ```bash
-   git add .claude/ openspec/ CLAUDE.md .gitignore
+   git add .claude/ openspec/ AGENTS.md CLAUDE.md .gitignore
    git commit -m "chore(openspec): install superpowers-bridge"
    ```
 
