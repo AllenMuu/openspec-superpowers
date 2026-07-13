@@ -1,5 +1,5 @@
-<!-- Source: superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md -->
-<!-- Drop this section into your project's CLAUDE.md so Claude routes future work using this schema correctly. -->
+<!-- Workflow routing rule for adopters. install.sh copies this (minus HTML comments) to .claude/rules/openspec-routing.md, auto-loaded by Claude Code at launch. -->
+<!-- To customize routing in a target repo, edit its .claude/rules/openspec-routing.md. -->
 <!-- v1.5.0-aligned: openspec v1.5.0 command set is propose/apply/archive/explore/sync (no new/ff/continue/verify). -->
 
 ## Workflow routing (read on session start)

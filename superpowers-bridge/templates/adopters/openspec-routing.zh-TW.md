@@ -1,5 +1,5 @@
-<!-- Source: superpowers-bridge/templates/adopters/CLAUDE.md.fragment.zh-TW.md -->
-<!-- 把這一節貼進你專案的 CLAUDE.md,讓 Claude 知道如何分流本 repo 使用本 schema 的工作。 -->
+<!-- Workflow routing 規則(adopter 用)。install.sh 會把本檔(去掉 HTML 註解)複製到 .claude/rules/openspec-routing.md,Claude Code 啟動時自動載入。 -->
+<!-- 要在目標 repo 客製 routing,編輯其 .claude/rules/openspec-routing.md。 -->
 <!-- v1.5.0 對齊:openspec v1.5.0 命令集為 propose/apply/archive/explore/sync(無 new/ff/continue/verify)。 -->
 
 ## 變更工作流(Claude Code 啟動先讀)

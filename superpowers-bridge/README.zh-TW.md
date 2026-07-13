@@ -23,7 +23,7 @@
 bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh)
 ```
 
-[`install.sh`](./install.sh) 會跑 `openspec init --tools claude`、安裝 schema、把 `superpowers-bridge` 設為預設 schema、把校正過的 v1.5.0 `Workflow routing` 段插進 `CLAUDE.md`、把 `.claude/settings.local.json` 加進 .gitignore、並驗證。冪等;不會 commit。
+[`install.sh`](./install.sh) 會跑 `openspec init --tools claude`、安裝 schema(會先備份既有版本)、把 `superpowers-bridge` 設為預設 schema、把 v1.5.0 `Workflow routing` 規則寫進 `.claude/rules/openspec-routing.md`(Claude Code 自動載入;不再改動 CLAUDE.md,僅遷移時清理舊段落)、把 `.claude/settings.local.json` 加進 .gitignore、並驗證。需 `openspec >= 1.5.0`(不符即中止)。冪等;不會 commit。
 
 繁中 routing 文本:
 
@@ -31,7 +31,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpower
 bash <(curl -fsSL https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge/install.sh) --locale zh-TW
 ```
 
-> 前置依賴:`openspec` CLI(`brew install openspec`)與 Superpowers 插件(`claude plugin install superpowers@claude-plugins-official`)。腳本會檢查並警告缺失。
+> 前置依賴:`openspec` CLI >= 1.5.0(`brew install openspec`)與 Superpowers 插件(`claude plugin install superpowers@claude-plugins-official`)。`openspec` 缺失或 < 1.5.0 時腳本會中止;插件缺失則僅警告。
 
 ### 方法 1:Claude Code 一鍵 prompt(推薦)
 
@@ -45,7 +45,7 @@ Install the superpowers-bridge schema for OpenSpec into this project:
 3. Copy the `superpowers-bridge/` subdirectory to `openspec/schemas/superpowers-bridge/`.
 4. Run `openspec schema validate superpowers-bridge` to verify.
 5. Run `openspec schemas` and confirm `superpowers-bridge` is listed.
-6. If a CLAUDE.md exists at the project root, ask me whether to insert the workflow-routing fragment from `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md` (auto-detect locale from existing CLAUDE.md content; default zh-TW for Traditional Chinese, no suffix for English). If I say yes, append the fragment as a new section. If no CLAUDE.md exists, skip.
+6. Write the workflow-routing rule to `.claude/rules/openspec-routing.md`, sourced from `openspec/schemas/superpowers-bridge/templates/adopters/openspec-routing.<locale>.md` (auto-detect locale from existing CLAUDE.md content if present; default zh-TW for Traditional Chinese, no suffix for English). Claude Code auto-loads `.claude/rules/` at launch, so no CLAUDE.md edit is needed. If a legacy `## Workflow routing` section exists in CLAUDE.md (from older installs), remove it - the rule file supersedes it.
 7. Clean up the temp directory.
 8. Verify Superpowers plugin is installed by running `claude plugin list`.
    If not listed, run `claude plugin install superpowers@claude-plugins-official`.
@@ -68,7 +68,7 @@ rm -rf /tmp/oss
 
 ## 升級已採用本 schema 的專案
 
-如果你的專案早已在 `openspec/schemas/superpowers-bridge/` 安裝過本 schema,想拿到最新版本,執行下列其中一種升級方式。升級會整個覆蓋 `superpowers-bridge/` 目錄,並提供 CLAUDE.md 片段更新 — 詳情見下方「升級會【覆蓋】什麼?」。
+如果你的專案早已在 `openspec/schemas/superpowers-bridge/` 安裝過本 schema,想拿到最新版本,執行下列其中一種升級方式。升級會整個覆蓋 `superpowers-bridge/` 目錄,並刷新 `.claude/rules/openspec-routing.md` 規則檔 - 詳情見下方「升級會【覆蓋】什麼?」。
 
 ### 升級方法 1:Claude Code 一鍵 prompt(推薦)
 
@@ -82,16 +82,12 @@ Upgrade the superpowers-bridge schema in this project:
 3. Show me the diff between the local `openspec/schemas/superpowers-bridge/` and the cloned `superpowers-bridge/` (use `diff -ruN`). Wait for my ack before overwriting.
 4. After my ack, overwrite the local schema dir with the cloned one.
 5. Run `openspec schema validate superpowers-bridge` to verify.
-6. Check whether this project has `CLAUDE.md` at the repo root.
-   - If yes: scan it for an existing workflow-routing section referencing superpowers-bridge.
-     - If found: show me the diff between that section and `superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md`. Wait for my ack before replacing.
-     - If not found: ask whether to insert the new fragment from `templates/adopters/CLAUDE.md.fragment.<locale>.md`.
-   - If no CLAUDE.md exists: skip.
+6. Refresh the routing rule at `.claude/rules/openspec-routing.md` from `superpowers-bridge/templates/adopters/openspec-routing.<locale>.md` (show me the diff first; wait for my ack before overwriting). Also scan `CLAUDE.md` for a legacy `## Workflow routing` section (left by older installs that wrote into CLAUDE.md); if found, offer to remove it - the rule file now carries that content.
 7. Clean up the temp directory.
 8. Show me the final state.
 ```
 
-> `<locale>` 預設 `zh-TW`(若你 CLAUDE.md 是繁中)或省略(英文)。Claude 會依你 CLAUDE.md 的既有語言判斷。
+> `<locale>` 預設 `zh-TW`(若你 CLAUDE.md 是繁中)或省略(英文)。Claude 依 CLAUDE.md 既有語言判斷;若無 CLAUDE.md 則預設英文。
 
 ### 升級方法 2:手動 bash
 
@@ -109,9 +105,11 @@ cp -R /tmp/oss-upgrade/superpowers-bridge ~/your-project/openspec/schemas/superp
 # 4. 驗證
 cd ~/your-project && openspec schema validate superpowers-bridge
 
-# 5. CLAUDE.md fragment(手動處理)
-# 看 /tmp/oss-upgrade/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.zh-TW.md
-# 比對自己 CLAUDE.md 是否要插入或更新對應段落
+# 5. 路由規則(手動處理)
+# 把 /tmp/oss-upgrade/superpowers-bridge/templates/adopters/openspec-routing.md
+#   (或 openspec-routing.zh-TW.md) 複製到 .claude/rules/openspec-routing.md
+# Claude Code 自動載入 .claude/rules/;移除 CLAUDE.md 裡舊的 '## Workflow routing'
+#   段落(舊版安裝程式寫在那裡)
 
 # 6. 清理
 rm -rf /tmp/oss-upgrade
@@ -122,11 +120,11 @@ rm -rf /tmp/oss-upgrade
 | 路徑 | 行為 | 是否需手動 |
 |---|---|---|
 | `openspec/schemas/superpowers-bridge/` | 自動整個目錄覆蓋 — 從 upstream 整包換新(Method 2 是 `rm -rf` + `cp -R`,Method 1 等價) | 不需 |
-| `CLAUDE.md`(專案根) | schema 目錄附 `templates/adopters/CLAUDE.md.fragment.<locale>.md` 片段;升級流程會把你的 CLAUDE.md 跟此片段 diff 給你看,等你 ack 才插入或更新 | 需要 — 確認 diff,選擇插入 / 取代 / 保留現有 |
+| `.claude/rules/openspec-routing.md` | schema 目錄附 `templates/adopters/openspec-routing.<locale>.md`;升級會覆蓋此規則檔(Claude Code 啟動時自動載入) | 最少 - 看 diff,覆蓋即安全 |
 
-> bridge 目錄是 monolithic — 要嘛整包換新版,要嘛留舊版,**沒有逐檔 opt-in**。CLAUDE.md 是升級流程唯一會碰專案根目錄的檔案,而且永遠等你 ack。
+> bridge 目錄是 monolithic - 要嘛整包換新版,要嘛留舊版,**沒有逐檔 opt-in**。升級會碰 `openspec/schemas/superpowers-bridge/` 與 `.claude/rules/openspec-routing.md`;不再寫入 `CLAUDE.md`(舊版安裝程式會 - 升級時會把 CLAUDE.md 裡舊的 `## Workflow routing` 段落清掉作為遷移)。
 
-> In-flight change(任一 phase:brainstorm / design / specs / ...)仍合法 — schema graph(`requires:` edges、PRECHECKs、artifact 依賴)在 v1.x 沒有變動。升級前產出的 `verify.md` / `retrospective.md` 仍可讀;若對它們重跑 `/opsx:apply`,會用新 template 結構覆蓋。
+> In-flight change(任一 phase:brainstorm / design / specs / ...)仍合法 - schema graph(`requires:` edges、PRECHECKs、artifact 依賴)在 v1.x 沒有變動。升級前產出的 `verify.md` / `retrospective.md` 仍可讀;依新 template 重新產生時會覆蓋成更新的結構。
 
 > 未來若 schema graph 結構性變動(增刪 artifact、改 `requires:` edges、PRECHECK 變動),會在 README 上方加版本欄位 + 提供 migration guide;v1 → v1.x 純 instruction prose 改動安全,不需 migration。
 
@@ -484,11 +482,13 @@ LLM 不必解讀 timing 文字 —— 跑指令、看結果即可。這是顧慮
 
 本 schema 撰寫時所對齊的 upstream 基準版本。這是**歷史快照,不是端對端相容性承諾** — CI 無法在 headless 環境跑完整的 prompt-layer workflow,行為相容性依賴 drift 觸發人類檢核。
 
-目前 bundle release: **`1.0.0`**(git tag `v1.0.0`;見 [VERSION](./VERSION))。
+目前 bundle release: **`1.1.0`**(git tag `v1.1.0`;見 [VERSION](./VERSION))。
 
 | superpowers-bridge | OpenSpec CLI | Superpowers plugin | 基準日期 |
 |---|---|---|---|
 | v1 | `1.4.1` | `v5.1.0` | 2026-06-10 |
+
+> **命令面 vs 基準聲明。** 文件、adopter fragment 與 `install.sh` 已描述 OpenSpec **v1.5.0** 命令集(`propose / apply / archive / explore / sync`),`install.sh` 並強制 `openspec >= 1.5.0`。但上表的「基準日期」仍記錄對 `1.4.1` 的人工聲明;要等 maintainer 在 `1.5.0` 上重跑完整 cycle 確認沒退步,才會推進到 `1.5.0`。簡言之:**命令面是 v1.5.0**;**已聲明基準仍是 1.4.1**,待驗證。
 
 ### 驗證機制
 
