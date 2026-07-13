@@ -17,11 +17,14 @@
 # Idempotent: safe to re-run. Backs up (does NOT rm) any existing schema dir.
 # Does NOT git commit (prints a suggested command at the end).
 # Run from the TARGET repo root.
+# RELEASE_TAG pins schema + script to a release tag (not main). Maintainers tag after merge:
+#   git tag v1.1.0 && git push origin v1.1.0
 
 set -euo pipefail
 
 # --- config (overridable via env) -----------------------------------------------
-BASE_URL="${BASE_URL:-https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/main/superpowers-bridge}"
+RELEASE_TAG="${RELEASE_TAG:-v1.1.0}"
+BASE_URL="${BASE_URL:-https://raw.githubusercontent.com/AllenMuu/openspec-superpowers/${RELEASE_TAG}/superpowers-bridge}"
 SCHEMA_REPO="${SCHEMA_REPO:-https://github.com/AllenMuu/openspec-superpowers.git}"
 DEFAULT_SCHEMA="superpowers-bridge"
 LOCALE="en"
@@ -127,9 +130,11 @@ if local_schema; then
 else
   CLONE_DIR="$(mktemp -d)"
   echo "    cloning $SCHEMA_REPO"
-  git clone --depth 1 "$SCHEMA_REPO" "$CLONE_DIR/repo" >/dev/null
+  git clone --depth 1 --branch "${RELEASE_TAG}" "$SCHEMA_REPO" "$CLONE_DIR/repo" >/dev/null
   cp -R "$CLONE_DIR/repo/superpowers-bridge" openspec/schemas/superpowers-bridge
 fi
+# Strip non-schema files (script + docs) pulled in by cp -R; keep VERSION, schema.yaml, templates/.
+rm -f openspec/schemas/superpowers-bridge/install.sh openspec/schemas/superpowers-bridge/README.md openspec/schemas/superpowers-bridge/README.zh-TW.md
 
 # --- 4. default schema ----------------------------------------------------------
 echo "==> [4/6] Set default schema = $DEFAULT_SCHEMA"
@@ -157,10 +162,10 @@ grep -v '^<!--' "$FRAGMENT_FILE" > "$fragment_body"
 # Migrate: strip any legacy "## Workflow routing" section previously written
 # into CLAUDE.md by older installers. New installs write a rule file instead
 # (auto-loaded from .claude/rules/, so CLAUDE.md no longer needs the section).
-if [[ -f CLAUDE.md ]] && grep -q '^## Workflow routing' CLAUDE.md; then
+if [[ -f CLAUDE.md ]] && grep -qE '^##[[:space:]]+[Ww]orkflow[[:space:]]+[Rr]outing' CLAUDE.md; then
   echo "    migrating: removing legacy '## Workflow routing' section from CLAUDE.md"
   awk 'BEGIN{skip=0}
-       /^## Workflow routing/{skip=1; next}
+       /^##[[:space:]]+[Ww]orkflow[[:space:]]+[Rr]outing/{skip=1; next}
        skip==1 && /^## /{skip=0}
        skip==0{print}' CLAUDE.md > CLAUDE.md.tmp && mv CLAUDE.md.tmp CLAUDE.md
 fi

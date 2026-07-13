@@ -4,7 +4,7 @@
 
 [![Schema Structure](https://github.com/AllenMuu/openspec-superpowers/actions/workflows/validate-schemas.yml/badge.svg?branch=main)](https://github.com/AllenMuu/openspec-superpowers/actions/workflows/validate-schemas.yml)
 [![Upstream Drift](https://img.shields.io/github/issues-search/AllenMuu/openspec-superpowers?query=is%3Aopen%20label%3Aupstream-version-check&label=Upstream%20Drift&color=yellow)](https://github.com/AllenMuu/openspec-superpowers/issues?q=is%3Aopen+label%3Aupstream-version-check)
-[![OpenSpec baseline](https://img.shields.io/badge/OpenSpec_baseline-1.4.1-0277bd)](#相容性)
+[![OpenSpec baseline](https://img.shields.io/badge/OpenSpec_baseline-1.5.0-0277bd)](#相容性)
 [![Superpowers baseline](https://img.shields.io/badge/Superpowers_baseline-v5.1.0-0277bd)](#相容性)
 
 > 把 [OpenSpec](https://github.com/Fission-AI/OpenSpec) 的 artifact 治理流程(**做什麼**)與 [obra/superpowers](https://github.com/obra/superpowers) 的執行技能(**怎麼做**)整合為單一工作流。額外提供 evidence-first 的 `retrospective` artifact,補上 Superpowers 沒有的 retro 能力。
@@ -486,9 +486,9 @@ LLM 不必解讀 timing 文字 —— 跑指令、看結果即可。這是顧慮
 
 | superpowers-bridge | OpenSpec CLI | Superpowers plugin | 基準日期 |
 |---|---|---|---|
-| v1 | `1.4.1` | `v5.1.0` | 2026-06-10 |
+| v1 | `1.5.0` | `v5.1.0` | 2026-07-13 |
 
-> **命令面 vs 基準聲明。** 文件、adopter fragment 與 `install.sh` 已描述 OpenSpec **v1.5.0** 命令集(`propose / apply / archive / explore / sync`),`install.sh` 並強制 `openspec >= 1.5.0`。但上表的「基準日期」仍記錄對 `1.4.1` 的人工聲明;要等 maintainer 在 `1.5.0` 上重跑完整 cycle 確認沒退步,才會推進到 `1.5.0`。簡言之:**命令面是 v1.5.0**;**已聲明基準仍是 1.4.1**,待驗證。
+> **命令面 vs 基準聲明。** 文件、adopter fragment 與 `install.sh` 描述 OpenSpec **v1.5.0** 命令集,已聲明基準現亦為 `1.5.0`(maintainer 已於 1.5.0 上跑過完整 cycle - propose -> apply -> verify -> retrospective -,於 2026-07-13 聲明)。命令面與已聲明基準已對齊。
 
 ### 驗證機制
 
